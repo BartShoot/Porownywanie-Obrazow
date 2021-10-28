@@ -89,6 +89,9 @@ namespace PorownywanieObrazow
                 int widthInBytes = bitmapData.Width * bytesPerPixel;
                 byte* PtrFirstPixel = (byte*)bitmapData.Scan0;
 
+                int[,] sumBlue = new int[heightInPixels, amountOfValues];
+                int[,] sumGreen = new int[heightInPixels, amountOfValues];
+                int[,] sumRed = new int[heightInPixels, amountOfValues];
 
                 Parallel.For(0, heightInPixels, y =>
                 {
@@ -99,20 +102,43 @@ namespace PorownywanieObrazow
                         int oldGreen = currentLine[x + 1];
                         int oldRed = currentLine[x + 2];
 
-                        histogram[0][oldRed]++;
-                        histogram[1][oldGreen]++;
-                        histogram[2][oldBlue]++;
+                        sumBlue[y, oldBlue]++;
+                        sumGreen[y, oldGreen]++;
+                        sumRed[y, oldRed]++;
 
-                        if (histogram[0][oldRed] + histogram[1][oldGreen] + histogram[2][oldBlue] > histogramMaxValue)
-                        {
-                            histogramMaxValue = (int)(histogram[0][oldRed] + histogram[1][oldGreen] + histogram[2][oldBlue]);
-                        }
                         currentLine[x] = (byte)oldBlue;
                         currentLine[x + 1] = (byte)oldGreen;
                         currentLine[x + 2] = (byte)oldRed;
                     }
                 });
                 imageToProcess.UnlockBits(bitmapData);
+
+                int[] finalBlue = new int[amountOfValues];
+                int[] finalGreen = new int[amountOfValues];
+                int[] finalRed = new int[amountOfValues];
+                for (int i = 0; i < heightInPixels; i++)
+                {
+                    for (int j = 0; j < amountOfValues; j++)
+                    {
+                        finalBlue[j] += sumBlue[i, j];
+                        finalGreen[j] += sumGreen[i, j];
+                        finalRed[j] += sumRed[i, j];
+                    }
+                }
+                for (int i = 0; i < amountOfValues; i++)
+                {
+                    histogram[0][i] = finalRed[i];
+                    histogram[1][i] = finalGreen[i];
+                    histogram[2][i] = finalBlue[i];
+
+                    if (histogram[0][i] + histogram[1][i] + histogram[2][i] > histogramMaxValue)
+                    {
+                        histogramMaxValue = (int)(histogram[0][i] + histogram[1][i] + histogram[2][i]);
+                    }
+                }
+                
+
+                
             }
         }
 
@@ -126,6 +152,12 @@ namespace PorownywanieObrazow
                 histogramDifference += Math.Abs(histogram[2][i] - imageToCompare.histogram[2][i]);
             }
             Console.WriteLine($"Roznica histogramow to: {histogramDifference}");
+        }
+
+        public void HistogramCompare(ImageProcessor imageToCompare, int methodSelect)
+        {
+            //https://docs.opencv.org/3.4.15/d8/dc8/tutorial_histogram_comparison.html
+            //na wszytkie 4 sposoby
         }
 
         private void DrawHistogramPlot()
