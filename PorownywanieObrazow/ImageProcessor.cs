@@ -15,8 +15,10 @@ namespace PorownywanieObrazow
         bool isHistogramCalculated;
         int bitDepth;
         int amountOfValues;
-        int[][]histogram = new int[3][];
+        int[][] histogram = new int[3][];
+        double[] histogramNormalized;
         int histogramMaxValue;
+        double averageHistogramValue;
         Color backgroundColor = Color.White;
 
         public ImageProcessor(Bitmap imageToProcess)
@@ -30,6 +32,7 @@ namespace PorownywanieObrazow
             {
                 histogram[i] = new int[amountOfValues];
             }
+            histogramNormalized = new double[amountOfValues];
         }
 
         internal void RandomColorNoise()
@@ -81,7 +84,7 @@ namespace PorownywanieObrazow
         ///<summary>
         ///Only calculate histogram for operations
         ///</summary>
-        public void CalculateHistogram()
+        private void CalculateHistogram()
         {
             unsafe
             {
@@ -157,10 +160,98 @@ namespace PorownywanieObrazow
             Console.WriteLine($"Roznica histogramow to: {histogramDifference}");
         }
 
+        ///<summary>
+        ///1. Correlation ( CV_COMP_CORREL )
+        ///<br> 2. Chi-Square ( CV_COMP_CHISQR )</br>
+        ///<br> 3. Intersection ( method=CV_COMP_INTERSECT )</br>
+        ///<br> 4. Bhattacharyya distance ( CV_COMP_BHATTACHARYYA )</br>
+        ///</summary>
         public void HistogramCompare(ImageProcessor imageToCompare, int methodSelect)
         {
             //https://docs.opencv.org/3.4.15/d8/dc8/tutorial_histogram_comparison.html
-            //na wszytkie 4 sposoby
+            //H1 = this.histogramNormalized, H2 = imageToCompare.histogramNormalized, N = amountOfValues
+            double distanceMetric = 0;
+            if (!isHistogramCalculated)
+            {
+                CalculateHistogram();
+            }
+            if (!imageToCompare.isHistogramCalculated)
+            {
+                imageToCompare.CalculateHistogram();
+            }
+            NormalizeHistogram();
+            imageToCompare.NormalizeHistogram();
+
+            switch (methodSelect)
+            {
+                case 1:
+                    HistogramAverage();
+                    imageToCompare.HistogramAverage();
+                    double pom1 = 0, pom2 = 0, sum1=0, sum2=0, sum3=0;
+                    for (int i = 0; i < amountOfValues; i++)
+                    {
+                        pom1 = histogramNormalized[i] - averageHistogramValue;
+                        pom2 = imageToCompare.histogramNormalized[i] - imageToCompare.averageHistogramValue;
+                        sum1 += pom1 * pom2;
+                        sum2 += Math.Pow(pom1, 2);
+                        sum3 += Math.Pow(pom2, 2);
+                    }
+                    distanceMetric = sum1 / Math.Sqrt(sum2 * sum3);
+                    Console.WriteLine("Różnica histogramów wersja 1 to: " + distanceMetric);
+                    break;
+                case 2:
+                    double sum = 0;
+                    for (int i = 0; i < amountOfValues; i++)
+                    {
+                        sum += Math.Pow(histogramNormalized[i] - imageToCompare.histogramNormalized[i], 2) / histogramNormalized[i];
+                    }
+                    distanceMetric = sum;
+                    Console.WriteLine("Różnica histogramów wersja 2 to: " + distanceMetric);
+                    break;
+                case 3:
+                    sum = 0;
+                    for (int i = 0; i < amountOfValues; i++)
+                    {
+                        sum += histogramNormalized[i] > imageToCompare.histogramNormalized[i] ? imageToCompare.histogramNormalized[i] : histogramNormalized[i];
+                    }
+                    distanceMetric = sum;
+                    Console.WriteLine("Różnica histogramów wersja 3 to: " + distanceMetric);
+                    break;
+                case 4:
+                    HistogramAverage();
+                    imageToCompare.HistogramAverage();
+                    sum = 0;
+                    for (int i = 0; i < amountOfValues; i++)
+                    {
+                        sum += Math.Sqrt(histogramNormalized[i] * imageToCompare.histogramNormalized[i]);
+                    }
+                    pom1 = Math.Sqrt(averageHistogramValue * imageToCompare.averageHistogramValue * amountOfValues * amountOfValues);
+                    distanceMetric = Math.Sqrt(1 - (1 / pom1) * sum);
+                    Console.WriteLine("Różnica histogramów wersja 4 to: " + distanceMetric);
+                    break;
+                default:
+                    Console.WriteLine("Nie ma takiego numeru");
+                    break;
+            }
+        }
+
+        private void NormalizeHistogram()
+        {
+            int imageSizeTimesColors = imageToProcess.Width*imageToProcess.Height*3;
+            for (int j = 0; j < amountOfValues; j++)
+            {
+                histogramNormalized[j] = (double)(histogram[0][j]+ histogram[1][j]+ histogram[2][j]) / (double)(imageSizeTimesColors);
+            }
+        }
+
+        private void HistogramAverage()
+        {
+            double valueSum=0;
+            for (int i = 0; i < amountOfValues; i++)
+            {
+                valueSum += histogramNormalized[i];
+            }
+            averageHistogramValue = valueSum / amountOfValues;
         }
 
         private void DrawHistogramPlot()
