@@ -12,6 +12,7 @@ namespace PorownywanieObrazow
     internal class ImageProcessor
     {
         System.Drawing.Bitmap imageToProcess;
+        bool isHistogramCalculated;
         int bitDepth;
         int amountOfValues;
         int[][]histogram = new int[3][];
@@ -22,6 +23,7 @@ namespace PorownywanieObrazow
         {
             this.ImageToProcess = imageToProcess;
             histogramMaxValue=0;
+            isHistogramCalculated=false;
             bitDepth = 8;
             amountOfValues = (int)Math.Pow(2, bitDepth);
             for (int i = 0; i < histogram.Length; i++)
@@ -62,6 +64,7 @@ namespace PorownywanieObrazow
                     }
                 });
                 imageToProcess.UnlockBits(bitmapData);
+                isHistogramCalculated = false;
             }
         }
         
@@ -70,7 +73,8 @@ namespace PorownywanieObrazow
         ///</summary>
         public void MakeHistogram()
         {
-            CalculateHistogram();
+            if(!isHistogramCalculated)
+                CalculateHistogram();
             DrawHistogramPlot();
         }
 
@@ -113,11 +117,13 @@ namespace PorownywanieObrazow
                     }
                 });
                 imageToProcess.UnlockBits(bitmapData);
+                isHistogramCalculated = true;
             }
         }
 
         public void HistogramCompare(ImageProcessor imageToCompare)
         {
+            if (!isHistogramCalculated) CalculateHistogram();
             int histogramDifference = 0;
             for (int i = 0; i < amountOfValues; i++)
             {
@@ -130,6 +136,7 @@ namespace PorownywanieObrazow
 
         private void DrawHistogramPlot()
         {
+            if (!isHistogramCalculated) CalculateHistogram();
             int histogramImageWidth = 2000, histogramImageHeight = 1000;
             Bitmap histogramImage = new Bitmap(histogramImageWidth, histogramImageHeight);
             Graphics graphics = Graphics.FromImage(histogramImage);
