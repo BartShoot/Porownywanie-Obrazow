@@ -140,9 +140,7 @@ namespace PorownywanieObrazow
                         histogramMaxValue = (int)(histogram[0][i] + histogram[1][i] + histogram[2][i]);
                     }
                 }
-                
-
-                
+                isHistogramCalculated = true;
             }
         }
 
