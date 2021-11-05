@@ -28,6 +28,8 @@ namespace PorownywanieObrazow
             isHistogramCalculated=false;
             bitDepth = 8;
             amountOfValues = (int)Math.Pow(2, bitDepth);
+            //dodac wczytanie z pliku do R[,],G[,] itd
+
             for (int i = 0; i < histogram.Length; i++)
             {
                 histogram[i] = new int[amountOfValues];
@@ -96,6 +98,8 @@ namespace PorownywanieObrazow
                 int widthInBytes = bitmapData.Width * bytesPerPixel;
                 byte* PtrFirstPixel = (byte*)bitmapData.Scan0;
 
+                
+
                 int[,] sumBlue = new int[heightInPixels, amountOfValues];
                 int[,] sumGreen = new int[heightInPixels, amountOfValues];
                 int[,] sumRed = new int[heightInPixels, amountOfValues];
@@ -132,6 +136,7 @@ namespace PorownywanieObrazow
                         finalRed[j] += sumRed[i, j];
                     }
                 }
+
                 for (int i = 0; i < amountOfValues; i++)
                 {
                     histogram[0][i] = finalRed[i];
@@ -235,6 +240,18 @@ namespace PorownywanieObrazow
             }
         }
 
+        public void HistogramCompare(ImageProcessor imageToCompare, int methodSelect, Point start, Point end)
+        {
+
+        }
+
+        public void HistogramCompare(ImageProcessor imageToCompare, int methodSelect, int startX, int startY, int endX, int endY)
+        {
+            Point start = new Point(startX, startY);
+            Point end = new Point(endX, endY);
+            HistogramCompare(imageToCompare, methodSelect, start, end);
+        }
+
         private void NormalizeHistogram()
         {
             int imageSizeTimesColors = imageToProcess.Width*imageToProcess.Height*3;
@@ -243,6 +260,58 @@ namespace PorownywanieObrazow
                 histogramNormalized[j] = (double)(histogram[0][j]+ histogram[1][j]+ histogram[2][j]) / (double)(imageSizeTimesColors);
             }
         }
+
+        public void HistogramRgbToHsv()
+        {
+            for (int i = 0; i < length; i++)
+            {
+
+            }
+        }
+
+        public (double hue, double saturation, double value) 
+            Rgb2Hsv(double r, double g, double b)
+            {
+                //based on the source from: https://www.geeksforgeeks.org/program-change-rgb-color-model-hsv-color-model/
+                // R, G, B values are divided by 255 
+                // to change the range from 0..255 to 0..1 
+                r = r / 255.0;
+                g = g / 255.0;
+                b = b / 255.0;
+
+                // h, s, v = hue, saturation, value 
+                double cmax = Math.Max(r, Math.Max(g, b)); // maximum of r, g, b 
+                double cmin = Math.Min(r, Math.Min(g, b)); // minimum of r, g, b 
+                double diff = cmax - cmin; // diff of cmax and cmin. 
+                double h = -1, s = -1;
+
+                // if cmax and cmax are equal then h = 0 
+                if (cmax == cmin)
+                    h = 0;
+
+                // if cmax equal r then compute h 
+                else if (cmax == r)
+                    h = (60 * ((g - b) / diff) + 360) % 360;
+
+                // if cmax equal g then compute h 
+                else if (cmax == g)
+                    h = (60 * ((b - r) / diff) + 120) % 360;
+
+                // if cmax equal b then compute h 
+                else if (cmax == b)
+                    h = (60 * ((r - g) / diff) + 240) % 360;
+
+                // if cmax equal zero 
+                if (cmax == 0)
+                    s = 0;
+                else
+                    s = (diff / cmax) * 100;
+
+                // compute v 
+                double v = cmax * 100;
+                return (h, s, v);
+
+            }
 
         private void HistogramAverage()
         {
@@ -254,7 +323,7 @@ namespace PorownywanieObrazow
             averageHistogramValue = valueSum / amountOfValues;
         }
 
-        private void DrawHistogramPlot()
+        private void DrawHistogramPlot(string fileName)
         {
             if (!isHistogramCalculated) CalculateHistogram();
             int histogramImageWidth = 2000, histogramImageHeight = 1000;
@@ -303,7 +372,7 @@ namespace PorownywanieObrazow
                                     histogramImageHeight - ((int)(histogramValue2 * yScale)));
                 graphics.DrawLine(blackPen, point1, point2);
             }
-            histogramImage.Save("histogram.png");
+            histogramImage.Save(fileName);
         }
 
         public Bitmap ImageToProcess { get => imageToProcess; set => imageToProcess = value; }
