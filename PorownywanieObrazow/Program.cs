@@ -1,18 +1,23 @@
-﻿using PorownywanieObrazow;
-using System.Diagnostics;
+﻿using ImageOperations;
 using System.Drawing;
-using System.Drawing.Imaging;
-//TODO do zrobienia nagłówek i main
-//TODO zrobic jako dll
+
 //email: dobija.bartosz@gmail.com
 //github: https://github.com/BartShoot/Porownywanie-Obrazow
-Bitmap testImage;
-ImageProcessor processor = new ImageProcessor(testImage = new Bitmap("C:/zdj/krajobraz.jpg"));
-ImageProcessor processor2 = new ImageProcessor(testImage = new Bitmap("C:/zdj/krajobraz2.jpg"));
-
-processor.MakeHistogram();
-for (int i = 1; i < 5; i++)
+class Porownywanie_Obrazow
 {
-    processor.HistogramCompare(processor2, i);
+    static void Main()
+    {
+        Bitmap testImage = new Bitmap("D:/noise/zupa.jpg");
+        Bitmap testImage2 = new Bitmap("D:/noise/zupa3.jpg");
+        ImageContainer obraz1 = new ImageContainer(testImage);
+        ImageContainer obraz2 = new ImageContainer(testImage);
+        Operations op = new Operations();
+        for (int i = 0; i < 5; i++)
+        {
+            double roznica = op.CompareHistogram(obraz1, obraz2, i);
+            Console.WriteLine(roznica);
+        }
+        
+        op.DrawHistogramPlot(obraz1, "D:/noise/histogram.jpg");
+    }
 }
-processor2.HistogramCompare(processor, 1);

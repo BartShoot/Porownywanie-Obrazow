@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -80,7 +81,7 @@ namespace PorownywanieObrazow
         {
             if(!isHistogramCalculated)
                 CalculateHistogram();
-            DrawHistogramPlot();
+            DrawHistogramPlot("test.png");
         }
 
         ///<summary>
@@ -263,10 +264,7 @@ namespace PorownywanieObrazow
 
         public void HistogramRgbToHsv()
         {
-            for (int i = 0; i < length; i++)
-            {
-
-            }
+            
         }
 
         public (double hue, double saturation, double value) 
@@ -378,3 +376,4 @@ namespace PorownywanieObrazow
         public Bitmap ImageToProcess { get => imageToProcess; set => imageToProcess = value; }
     }
 }
+*/
