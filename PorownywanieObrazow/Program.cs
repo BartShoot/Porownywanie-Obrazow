@@ -12,7 +12,7 @@ class Porownywanie_Obrazow
         Stopwatch sw = new Stopwatch();
         sw.Start();
         Bitmap testImage = new Bitmap("C:/zdj/krajobraz.jpg");
-        Bitmap testImage2 = new Bitmap("C:/zdj/krajobraz2.jpg");
+        Bitmap testImage2 = new Bitmap("C:/zdj/drzewa.jpg");
         ImageContainer obraz1 = new ImageContainer(testImage);
         //ImageContainer obrazAccu2 = new ImageContainer(testImage, 2);
         //ImageContainer obrazAccu4 = new ImageContainer(testImage, 4);
@@ -20,15 +20,25 @@ class Porownywanie_Obrazow
         Operations op = new Operations();
         sw.Stop();
         Console.WriteLine($"Czas generacji {sw.Elapsed}");
-        for (int i = 1; i < 5; i++)
-        {
-            sw.Restart();
-            //double roznica = op.CompareHistogram(obraz1, obraz2, i);
-            double roznica = op.CompareHistogram(obraz1, obraz2, i, 0, 0, 500, 500);
-            sw.Stop();
-            Console.WriteLine((decimal)roznica);
-            Console.WriteLine($"Czas liczenia {sw.Elapsed}");
-        }
+
+        //for (int i = 1; i < 5; i++)
+        //{
+        //    sw.Restart();
+        //    //double roznica = op.CompareHistogram(obraz1, obraz2, i);
+        //    double roznica = op.CompareHistogram(obraz1, obraz2, i, 0, 0, 500, 500);
+        //    sw.Stop();
+        //    Console.WriteLine((decimal)roznica);
+        //    Console.WriteLine($"Czas liczenia {sw.Elapsed}");
+        //}
+        sw.Restart();
+        op.EdgeDetect(obraz1, "C:/zdj/edgeDetect.jpg");
+        sw.Stop();
+        Console.WriteLine($"Czas liczenia {sw.Elapsed}");
+        op.EdgeDetect(obraz2, "C:/zdj/edgeDetect2.jpg");
+
+        //Console.WriteLine("Kontrast 1: "+ op.GetContrast(obraz1, 0, 0, 500, 500));
+        //Console.WriteLine("Kontrast 2: " + op.GetContrast(obraz2, 0, 0, 500, 500));
+        //Console.WriteLine("Kontrast 1 po raz drugi: " + op.GetContrast(obraz1, 0, 0, 500, 500));
         //Console.WriteLine("Accuracy 1 i accuracy 2");
         //Console.WriteLine(op.CompareHistogram(obraz1, obrazAccu2, 1, 0, 0, 500, 500));
         //Console.WriteLine("Accuracy 2 i accuracy 4");

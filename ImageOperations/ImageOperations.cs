@@ -12,9 +12,9 @@ namespace ImageOperations
         int amountOfValues;
         int histogramMaxValue;
         int accuracy;
-        int[,] r; //zmienić na tablice poszarpane i properties na pola 
-        int[,] g;
-        int[,] b;
+        public int[][] R; //zmienić na tablice poszarpane i properties na pola 
+        public int[][] G;
+        public int[][] B;
         int[][] histogramRGB = new int[3][];
         int[][] histogramHSV = new int[3][];
         double[] histogramNormalized;
@@ -27,9 +27,16 @@ namespace ImageOperations
             Width = imageToLoad.Width;
             Height = imageToLoad.Height;
 
-            R = new int[Width, Height];
-            G = new int[Width, Height];
-            B = new int[Width, Height];
+            R = new int[Width][];
+            G = new int[Width][];
+            B = new int[Width][];
+
+            for (int i = 0; i < Width; i++)
+            {
+                R[i] = new int[Height];
+                G[i] = new int[Height];
+                B[i] = new int[Height];
+            }
 
             bitDepth = 8;
             Accuracy = 1;
@@ -66,9 +73,9 @@ namespace ImageOperations
                     for (int x = 0; x < widthInBytes; x = x + bytesPerPixel)
                     {
                         currentWidthInPixels = x / bytesPerPixel;
-                        R[currentWidthInPixels, y] = currentLine[x];
-                        G[currentWidthInPixels, y] = currentLine[x + 1];
-                        B[currentWidthInPixels, y] = currentLine[x + 2];
+                        R[currentWidthInPixels][y] = currentLine[x];
+                        G[currentWidthInPixels][y] = currentLine[x + 1];
+                        B[currentWidthInPixels][y] = currentLine[x + 2];
                     }
                 }
                 imageToLoad.UnlockBits(bitmapData);
@@ -81,9 +88,16 @@ namespace ImageOperations
             Width = imageToLoad.Width;
             Height = imageToLoad.Height;
 
-            R = new int[Width, Height];
-            G = new int[Width, Height];
-            B = new int[Width, Height];
+            int[][] R = new int[Width][];
+            int[][] G = new int[Width][];
+            int[][] B = new int[Width][];
+
+            for (int i = 0; i < Width; i++)
+            {
+                R[i] = new int[Height];
+                G[i] = new int[Height];
+                B[i] = new int[Height];
+            }
 
             bitDepth = 8;
             this.accuracy = accuracy;
@@ -120,9 +134,9 @@ namespace ImageOperations
                     for (int x = 0; x < widthInBytes; x = x + bytesPerPixel)
                     {
                         currentWidthInPixels = x / bytesPerPixel;
-                        R[currentWidthInPixels, y] = currentLine[x];
-                        G[currentWidthInPixels, y] = currentLine[x + 1];
-                        B[currentWidthInPixels, y] = currentLine[x + 2];
+                        R[currentWidthInPixels][y] = currentLine[x];
+                        G[currentWidthInPixels][y] = currentLine[x + 1];
+                        B[currentWidthInPixels][y] = currentLine[x + 2];
                     }
                 }
                 imageToLoad.UnlockBits(bitmapData);
@@ -131,9 +145,6 @@ namespace ImageOperations
 
         public int[][] HistogramRGB { get => histogramRGB; set => histogramRGB = value; }
         public int[][] HistogramHSV { get => histogramHSV; set => histogramHSV = value; }
-        public int[,] R { get => r; set => r = value; }
-        public int[,] G { get => g; set => g = value; }
-        public int[,] B { get => b; set => b = value; }
         public double[] HistogramNormalized { get => histogramNormalized; set => histogramNormalized = value; }
         public int AmountOfValues { get => amountOfValues; set => amountOfValues = value; }
         public double AverageHistogramValue { get => averageHistogramValue; set => averageHistogramValue = value; }
@@ -398,9 +409,9 @@ namespace ImageOperations
             {
                 for (int j = startX; j < endY - 1; j++)
                 {
-                    int rValue = image.R[i, j],
-                        gValue = image.G[i, j],
-                        bValue = image.B[i, j];
+                    int rValue = image.R[i][j],
+                        gValue = image.G[i][j],
+                        bValue = image.B[i][j];
 
                     image.HistogramRGB[0][rValue / image.Accuracy]++;
                     image.HistogramRGB[1][gValue / image.Accuracy]++;
@@ -478,6 +489,114 @@ namespace ImageOperations
                 image.HistogramNormalized[i] = (double)(image.HistogramRGB[0][i] + image.HistogramRGB[1][i] + image.HistogramRGB[2][i]) / (double)imageSizeTimesColors;
                 test += image.HistogramNormalized[i];
             }
+        }
+
+        public double GetContrast(ImageContainer image, int startX, int startY, int endX, int endY)
+        {
+            double Normalize(double value8bit)
+            {
+                return value8bit / 255 * 3;
+            }
+            double sumOfPixelValues = 0;
+            for (int i = startX; i < endX; i++)
+            {
+                for (int j = startY; j < endY; j++)
+                {
+                    double intensity =  Normalize(image.R[i][j]) +
+                                        Normalize(image.G[i][j]) +
+                                        Normalize(image.B[i][j]);
+
+                    sumOfPixelValues += intensity;
+                }
+            }
+
+            double averagePixelValue = sumOfPixelValues / ((endX - startX) * (endY - startY));
+            double meanValue = 0;
+
+            for (int i = startX; i < endX; i++)
+            {
+                for (int j = startY; j < endY; j++)
+                {
+                    double intensity =  Normalize(image.R[i][j]) +
+                                        Normalize(image.G[i][j]) +
+                                        Normalize(image.B[i][j]);
+                    meanValue += Math.Pow(intensity-averagePixelValue, 2);
+                }
+            }
+            return Math.Sqrt(meanValue / ((endX - startX) * (endY - startY)));
+        }
+
+        public void EdgeDetect(ImageContainer image, string fileName)
+        {
+            Bitmap edgeDetectImage = new Bitmap(image.Width, image.Height);
+            Color color = new Color();
+
+            int LoadMatrix(int x, int y)
+            {
+                if (x < 0 || x >= image.Width)
+                    return 0;
+                if (y < 0 || y >= image.Height)
+                    return 0;
+                return (image.R[x][y] + image.G[x][y] + image.B[x][y]);
+            }
+
+            int[][] operationMatrix = new int [][]
+            { 
+                new int[] { 0, 1, 0 },
+                new int[] { 1,-4, 1 },
+                new int[] { 0, 1, 0 }
+            };
+
+            int[][] imageMatrix = new int[3][]
+            {
+                new int[] {0,0,0},
+                new int[] {0,0,0},
+                new int[] {0,0,0}
+            };
+
+            int newPixelValue = 0;
+
+            for (int i = 0; i < image.Width; i++)
+            {
+                for (int j = 0; j < image.Height; j++)
+                {
+                    imageMatrix[0][0] = LoadMatrix(i - 1,   j - 1);
+                    imageMatrix[0][1] = LoadMatrix(i,       j - 1);
+                    imageMatrix[0][2] = LoadMatrix(i + 1,   j - 1);
+
+                    imageMatrix[1][0] = LoadMatrix(i - 1,   j);
+                    imageMatrix[1][1] = LoadMatrix(i,       j);
+                    imageMatrix[1][2] = LoadMatrix(i + 1,   j);
+
+                    imageMatrix[2][0] = LoadMatrix(i - 1,   j + 1);
+                    imageMatrix[2][1] = LoadMatrix(i,       j + 1);
+                    imageMatrix[2][2] = LoadMatrix(i + 1,   j + 1);
+
+                    newPixelValue = imageMatrix[0][0] * operationMatrix[0][0] +
+                                    imageMatrix[0][1] * operationMatrix[0][1] +
+                                    imageMatrix[0][2] * operationMatrix[0][2] +
+
+                                    imageMatrix[1][0] * operationMatrix[1][0] +
+                                    imageMatrix[1][1] * operationMatrix[1][1] +
+                                    imageMatrix[1][2] * operationMatrix[1][2] +
+
+                                    imageMatrix[2][0] * operationMatrix[2][0] +
+                                    imageMatrix[2][1] * operationMatrix[2][1] +
+                                    imageMatrix[2][2] * operationMatrix[2][2];
+
+
+                    if (newPixelValue < 0)
+                        newPixelValue = 0;
+                    if (newPixelValue > 255)
+                        newPixelValue = 255;
+
+                    color = Color.FromArgb(255, newPixelValue, newPixelValue, newPixelValue);
+
+                    edgeDetectImage.SetPixel(i, j, color);
+
+                }
+            }
+            edgeDetectImage.Save(fileName);
         }
 
         public void DrawHistogramPlot(ImageContainer image, string fileName)
