@@ -11,13 +11,16 @@ namespace ImageOperations
         int bitDepth;
         int amountOfValues;
         int histogramMaxValue;
-        int[,] r;
+        int accuracy;
+        int[,] r; //zmienić na tablice poszarpane i properties na pola 
         int[,] g;
         int[,] b;
         int[][] histogramRGB = new int[3][];
         int[][] histogramHSV = new int[3][];
         double[] histogramNormalized;
         double averageHistogramValue;
+        bool isHistogramCalculated;
+
         public ImageContainer(Bitmap imageToLoad)
         {
             this.imageToLoad = imageToLoad;
@@ -29,10 +32,66 @@ namespace ImageOperations
             B = new int[Width, Height];
 
             bitDepth = 8;
-            AmountOfValues = (int)Math.Pow(2, bitDepth);
+            Accuracy = 1;
+            AmountOfValues = (int)Math.Pow(2, bitDepth) / Accuracy;
             HistogramMaxValue = 0;
+            IsHistogramCalculated = false;
 
-            HistogramNormalized=new double[AmountOfValues];
+            HistogramNormalized = new double[AmountOfValues / accuracy];
+            for (int i = 0; i < histogramRGB.Length; i++)
+            {
+                histogramRGB[i] = new int[AmountOfValues / accuracy];
+            }
+            histogramHSV[0] = new int[360];
+            histogramHSV[1] = new int[256];
+            histogramHSV[2] = new int[256];
+
+            unsafe
+            {
+                BitmapData bitmapData = imageToLoad.LockBits
+                    (
+                    new Rectangle(0, 0, imageToLoad.Width, imageToLoad.Height),
+                    ImageLockMode.ReadWrite,
+                    imageToLoad.PixelFormat
+                    );
+                int bytesPerPixel = System.Drawing.Bitmap.GetPixelFormatSize(imageToLoad.PixelFormat) / 8;
+                int heightInPixels = bitmapData.Height;
+                int currentWidthInPixels = 0;
+                int widthInBytes = bitmapData.Width * bytesPerPixel;
+                byte* ptrFirstPixel = (byte*)bitmapData.Scan0;
+
+                for (int y = 0; y < heightInPixels; y++)
+                {
+                    byte* currentLine = ptrFirstPixel + (y * bitmapData.Stride);
+                    for (int x = 0; x < widthInBytes; x = x + bytesPerPixel)
+                    {
+                        currentWidthInPixels = x / bytesPerPixel;
+                        R[currentWidthInPixels, y] = currentLine[x];
+                        G[currentWidthInPixels, y] = currentLine[x + 1];
+                        B[currentWidthInPixels, y] = currentLine[x + 2];
+                    }
+                }
+                imageToLoad.UnlockBits(bitmapData);
+            }
+        }
+
+        public ImageContainer(Bitmap imageToLoad, int accuracy)
+        {
+            this.imageToLoad = imageToLoad;
+            Width = imageToLoad.Width;
+            Height = imageToLoad.Height;
+
+            R = new int[Width, Height];
+            G = new int[Width, Height];
+            B = new int[Width, Height];
+
+            bitDepth = 8;
+            this.accuracy = accuracy;
+            AmountOfValues = (int)Math.Pow(2, bitDepth) / Accuracy;
+            HistogramMaxValue = 0;
+            IsHistogramCalculated = false;
+
+            HistogramNormalized = new double[AmountOfValues];
             for (int i = 0; i < histogramRGB.Length; i++)
             {
                 histogramRGB[i] = new int[AmountOfValues];
@@ -45,8 +104,8 @@ namespace ImageOperations
             {
                 BitmapData bitmapData = imageToLoad.LockBits
                     (
-                    new Rectangle(0, 0, imageToLoad.Width, imageToLoad.Height), 
-                    ImageLockMode.ReadWrite, 
+                    new Rectangle(0, 0, imageToLoad.Width, imageToLoad.Height),
+                    ImageLockMode.ReadWrite,
                     imageToLoad.PixelFormat
                     );
                 int bytesPerPixel = System.Drawing.Bitmap.GetPixelFormatSize(imageToLoad.PixelFormat) / 8;
@@ -54,7 +113,7 @@ namespace ImageOperations
                 int currentWidthInPixels = 0;
                 int widthInBytes = bitmapData.Width * bytesPerPixel;
                 byte* ptrFirstPixel = (byte*)bitmapData.Scan0;
-                
+
                 for (int y = 0; y < heightInPixels; y++)
                 {
                     byte* currentLine = ptrFirstPixel + (y * bitmapData.Stride);
@@ -81,13 +140,15 @@ namespace ImageOperations
         public int Width { get => width; set => width = value; }
         public int Height { get => height; set => height = value; }
         public int HistogramMaxValue { get => histogramMaxValue; set => histogramMaxValue = value; }
+        public bool IsHistogramCalculated { get => isHistogramCalculated; set => isHistogramCalculated = value; }
+        public int Accuracy { get => accuracy; set => accuracy = value; }
     }
     public class Operations
     {
         ///<summary>
         ///1. Correlation ( CV_COMP_CORREL )
         ///<br> 2. Chi-Square ( CV_COMP_CHISQR )</br>
-        ///<br> 3. Intersection ( method=CV_COMP_INTERSECT )</br>
+        ///<br> 3. Intersection ( CV_COMP_INTERSECT )</br>
         ///<br> 4. Bhattacharyya distance ( CV_COMP_BHATTACHARYYA )</br>
         ///</summary>
         public double CompareHistogram(ImageContainer image1, ImageContainer image2, int method)
@@ -99,10 +160,10 @@ namespace ImageOperations
         ///<summary>
         ///1. Correlation ( CV_COMP_CORREL )
         ///<br> 2. Chi-Square ( CV_COMP_CHISQR )</br>
-        ///<br> 3. Intersection ( method=CV_COMP_INTERSECT )</br>
+        ///<br> 3. Intersection ( CV_COMP_INTERSECT )</br>
         ///<br> 4. Bhattacharyya distance ( CV_COMP_BHATTACHARYYA )</br>
         ///</summary>
-        public double CompareHistogram(ImageContainer image1, ImageContainer image2, int method, 
+        public double CompareHistogram(ImageContainer image1, ImageContainer image2, int method,
             int startX, int startY, int endX, int endY)
         {
             this.CalculateHistogram(image1, startX, startY, endX, endY);
@@ -137,39 +198,132 @@ namespace ImageOperations
             this.HistogramAverage(image1);
             this.HistogramAverage(image2);
             double sum = 0;
-            for (int i = 0; i < image1.AmountOfValues; i++)
+            if (image1.Accuracy == image2.Accuracy)
             {
-                sum += Math.Sqrt(image1.HistogramNormalized[i] * image2.HistogramNormalized[i]);
+                for (int i = 0; i < image1.AmountOfValues; i++)
+                {
+                    sum += Math.Sqrt(image1.HistogramNormalized[i] * image2.HistogramNormalized[i]);
+                }
+                double pom1 = Math.Sqrt(image1.AverageHistogramValue * image2.AverageHistogramValue * image1.AmountOfValues * image1.AmountOfValues);
+                return Math.Sqrt(1 - (1 / pom1) * sum);
             }
-            double pom1 = Math.Sqrt(image1.AverageHistogramValue * image2.AverageHistogramValue * image1.AmountOfValues * image1.AmountOfValues);
-            return Math.Sqrt(1 - (1 / pom1) * sum);
+
+            if (image1.Accuracy > image2.Accuracy)
+            {
+                for (int i = 0; i < image2.AmountOfValues; i++)
+                {
+                    sum += Math.Sqrt(image1.HistogramNormalized[i / image1.Accuracy] * image2.HistogramNormalized[i]);
+                }
+                double pom1 = Math.Sqrt(image1.AverageHistogramValue * image2.AverageHistogramValue * image1.AmountOfValues * image1.AmountOfValues);
+                return Math.Sqrt(1 - (1 / pom1) * sum);
+            }
+
+            if (image1.Accuracy < image2.Accuracy)
+            {
+                for (int i = 0; i < image1.AmountOfValues; i++)
+                {
+                    sum += Math.Sqrt(image1.HistogramNormalized[i] * image2.HistogramNormalized[i / image2.Accuracy]);
+                }
+                double pom1 = Math.Sqrt(image1.AverageHistogramValue * image2.AverageHistogramValue * image1.AmountOfValues * image1.AmountOfValues);
+                return Math.Sqrt(1 - (1 / pom1) * sum);
+            }
+            return -1;
+
         }
 
         private double CompareIntersection(ImageContainer image1, ImageContainer image2)
         {
             double sum = 0;
-            for (int i = 0; i < image1.AmountOfValues; i++)
+            if (image1.Accuracy == image2.Accuracy)
             {
-                if (image1.HistogramNormalized[i] > image2.HistogramNormalized[i])
+                for (int i = 0; i < image1.AmountOfValues; i++)
                 {
-                    sum += image2.HistogramNormalized[i];
+                    if (image1.HistogramNormalized[i] > image2.HistogramNormalized[i])
+                    {
+                        sum += image2.HistogramNormalized[i];
+                    }
+                    else
+                    {
+                        sum += image1.HistogramNormalized[i];
+                    }
                 }
-                else
-                {
-                    sum += image1.HistogramNormalized[i];
-                }
+                return sum;
             }
-            return sum;
+
+            if (image1.Accuracy > image2.Accuracy)
+            {
+                for (int i = 0; i < image2.AmountOfValues; i++)
+                {
+                    if (image1.HistogramNormalized[i / image1.Accuracy] > image2.HistogramNormalized[i])
+                    {
+                        sum += image2.HistogramNormalized[i];
+                    }
+                    else
+                    {
+                        sum += image1.HistogramNormalized[i / image1.Accuracy];
+                    }
+                }
+                return sum;
+            }
+
+            if (image1.Accuracy < image2.Accuracy)
+            {
+                for (int i = 0; i < image1.AmountOfValues; i++)
+                {
+                    if (image1.HistogramNormalized[i] > image2.HistogramNormalized[i / image2.Accuracy])
+                    {
+                        sum += image2.HistogramNormalized[i / image2.Accuracy];
+                    }
+                    else
+                    {
+                        sum += image1.HistogramNormalized[i];
+                    }
+                }
+                return sum;
+            }
+            return -1;
+
         }
 
         private double CompareChiSquare(ImageContainer image1, ImageContainer image2)
         {
             double sum = 0;
-            for (int i = 0; i < image1.AmountOfValues; i++)
+            if (image1.Accuracy == image2.Accuracy)
             {
-                sum += Math.Pow(image1.HistogramNormalized[i] - image2.HistogramNormalized[i], 2) / image1.HistogramNormalized[i];
+                for (int i = 0; i < image1.AmountOfValues; i++)
+                {
+                    if (image1.HistogramNormalized[i] != 0)
+                    {
+                        sum += Math.Pow(image1.HistogramNormalized[i] - image2.HistogramNormalized[i], 2) / image1.HistogramNormalized[i];
+                    }
+                }
+                return sum;
             }
-            return sum;
+
+            if (image1.Accuracy > image2.Accuracy)
+            {
+                for (int i = 0; i < image2.AmountOfValues; i++)
+                {
+                    if (image1.HistogramNormalized[i] != 0)
+                    {
+                        sum += Math.Pow(image1.HistogramNormalized[i / image1.Accuracy] - image2.HistogramNormalized[i], 2) / image1.HistogramNormalized[i / image1.Accuracy];
+                    }
+                }
+                return sum;
+            }
+
+            if (image1.Accuracy < image2.Accuracy)
+            {
+                for (int i = 0; i < image1.AmountOfValues; i++)
+                {
+                    if (image1.HistogramNormalized[i] != 0)
+                    {
+                        sum += Math.Pow(image1.HistogramNormalized[i] - image2.HistogramNormalized[i / image2.Accuracy], 2) / image1.HistogramNormalized[i];
+                    }
+                }
+                return sum;
+            }
+            return -1;
         }
 
         private double CompareCorrelation(ImageContainer image1, ImageContainer image2)
@@ -177,15 +331,46 @@ namespace ImageOperations
             this.HistogramAverage(image1);
             this.HistogramAverage(image2);
             double pom1 = 0, pom2 = 0, sum1 = 0, sum2 = 0, sum3 = 0;
-            for (int i = 0; i < image1.AmountOfValues; i++)
+
+            if (image1.Accuracy == image2.Accuracy)
             {
-                pom1 = image1.HistogramNormalized[i] - image1.AverageHistogramValue;
-                pom2 = image2.HistogramNormalized[i] - image2.AverageHistogramValue;
-                sum1 += pom1 * pom2;
-                sum2 += Math.Pow(pom1, 2);
-                sum3 += Math.Pow(pom2, 2);
+                for (int i = 0; i < image1.AmountOfValues; i++)
+                {
+                    pom1 = image1.HistogramNormalized[i] - image1.AverageHistogramValue;
+                    pom2 = image2.HistogramNormalized[i] - image2.AverageHistogramValue;
+                    sum1 += pom1 * pom2;
+                    sum2 += Math.Pow(pom1, 2);
+                    sum3 += Math.Pow(pom2, 2);
+                }
+                return sum1 / Math.Sqrt(sum2 * sum3);
             }
-            return sum1 / Math.Sqrt(sum2 * sum3);
+
+            if (image1.Accuracy > image2.Accuracy)
+            {
+                for (int i = 0; i < image2.AmountOfValues; i++)
+                {
+                    pom1 = image1.HistogramNormalized[i / image1.Accuracy] - image1.AverageHistogramValue;
+                    pom2 = image2.HistogramNormalized[i] - image2.AverageHistogramValue;
+                    sum1 += pom1 * pom2;
+                    sum2 += Math.Pow(pom1, 2);
+                    sum3 += Math.Pow(pom2, 2);
+                }
+                return sum1 / Math.Sqrt(sum2 * sum3);
+            }
+
+            if (image1.Accuracy < image2.Accuracy)
+            {
+                for (int i = 0; i < image1.AmountOfValues; i++)
+                {
+                    pom1 = image1.HistogramNormalized[i] - image1.AverageHistogramValue;
+                    pom2 = image2.HistogramNormalized[i / image2.Accuracy] - image2.AverageHistogramValue;
+                    sum1 += pom1 * pom2;
+                    sum2 += Math.Pow(pom1, 2);
+                    sum3 += Math.Pow(pom2, 2);
+                }
+                return sum1 / Math.Sqrt(sum2 * sum3);
+            }
+            return -1;
         }
 
         private void HistogramAverage(ImageContainer image)
@@ -205,17 +390,21 @@ namespace ImageOperations
 
         private void CalculateHistogram(ImageContainer image, int startX, int startY, int endX, int endY)
         {
-            for (int i = startY; i < endX-1; i++)
+            if (image.IsHistogramCalculated)
             {
-                for (int j = startX; j < endY-1; j++)
+                return;
+            }
+            for (int i = startY; i < endX - 1; i++)
+            {
+                for (int j = startX; j < endY - 1; j++)
                 {
                     int rValue = image.R[i, j],
                         gValue = image.G[i, j],
                         bValue = image.B[i, j];
 
-                    image.HistogramRGB[0][rValue]++;
-                    image.HistogramRGB[1][gValue]++;
-                    image.HistogramRGB[2][bValue]++;
+                    image.HistogramRGB[0][rValue / image.Accuracy]++;
+                    image.HistogramRGB[1][gValue / image.Accuracy]++;
+                    image.HistogramRGB[2][bValue / image.Accuracy]++;
 
                     //TODO: HistogramHSV
                     (double hue, double saturation, double value) = Rgb2Hsv(rValue, gValue, bValue);
@@ -226,13 +415,14 @@ namespace ImageOperations
             }
             for (int i = 0; i < image.AmountOfValues; i++)
             {
-                int sum =   image.HistogramRGB[0][i] +
+                int sum = image.HistogramRGB[0][i] +
                             image.HistogramRGB[1][i] +
                             image.HistogramRGB[2][i];
                 if (image.HistogramMaxValue < sum)
                     image.HistogramMaxValue = sum;
             }
             this.NormalizeHistogram(image, startX, startY, endX, endY);
+            image.IsHistogramCalculated = true;
         }
 
         private (double hue, double saturation, double value)
@@ -281,10 +471,12 @@ namespace ImageOperations
 
         private void NormalizeHistogram(ImageContainer image, int startX, int startY, int endX, int endY)
         {
-            int imageSizeTimesColors = (endX - startX)*(endY-startY)*3;
-            for (int i = 0;i<image.AmountOfValues; i++)
+            int imageSizeTimesColors = (endX - startX) * (endY - startY) * 3;
+            double test = 0;
+            for (int i = 0; i < image.AmountOfValues; i++)
             {
                 image.HistogramNormalized[i] = (double)(image.HistogramRGB[0][i] + image.HistogramRGB[1][i] + image.HistogramRGB[2][i]) / (double)imageSizeTimesColors;
+                test += image.HistogramNormalized[i];
             }
         }
 
@@ -302,19 +494,31 @@ namespace ImageOperations
             Font font = new Font(FontFamily.GenericSerif, 12);
             Brush brush = new SolidBrush(Color.Black);
             SizeF size = graphics.MeasureString(Convert.ToString(image.HistogramMaxValue), font);
-            
+
             Pen redPen = new Pen(Color.Red, 1);
             Pen greenPen = new Pen(Color.Green, 1);
             Pen bluePen = new Pen(Color.Blue, 1);
             Pen blackPen = new Pen(Color.Black, 1);
+            Pen gridPen = new Pen(Color.FromArgb(40, Color.Black), 1);
 
             Point point1 = new Point(0, 0);
             Point point2 = new Point(0, 0);
-            int x1, x2, y1, y2, xOffset=Convert.ToInt32(size.Width);
+            int x1, x2, y1, y2, xOffset = Convert.ToInt32(size.Width);
             for (int i = 0; i < image.AmountOfValues - 1; i++)
             {
-                x1 = i * (int)xScale+ xOffset;
-                x2 = (i + 1) * (int)xScale+ xOffset;
+                x1 = i * (int)xScale + xOffset;
+                x2 = (i + 1) * (int)xScale + xOffset;
+
+                if (i % 8 == 0)
+                {
+                    graphics.DrawLine(gridPen, x1, 0, x1, histogramImageHeight);
+                    graphics.DrawString(Convert.ToString(i), font, brush, x1, 0);
+                }
+                if (i == image.AmountOfValues - 2)
+                {
+                    graphics.DrawLine(gridPen, x2, 0, x2, histogramImageHeight);
+                    graphics.DrawString(Convert.ToString(i + 1), font, brush, x2, 0);
+                }
 
                 y1 = histogramImageHeight - ((int)(image.HistogramRGB[0][i] * yScale));
                 y2 = histogramImageHeight - ((int)(image.HistogramRGB[0][i + 1] * yScale));
@@ -334,12 +538,12 @@ namespace ImageOperations
                 point2 = new Point(x2, y2);
                 graphics.DrawLine(bluePen, point1, point2);
 
-                int histogramValue = (int)( image.HistogramRGB[0][i] + 
-                                            image.HistogramRGB[1][i] + 
+                int histogramValue = (int)(image.HistogramRGB[0][i] +
+                                            image.HistogramRGB[1][i] +
                                             image.HistogramRGB[2][i]);
 
-                int histogramValue2 = (int)(image.HistogramRGB[0][i + 1] + 
-                                            image.HistogramRGB[1][i + 1] + 
+                int histogramValue2 = (int)(image.HistogramRGB[0][i + 1] +
+                                            image.HistogramRGB[1][i + 1] +
                                             image.HistogramRGB[2][i + 1]);
                 y1 = histogramImageHeight - ((int)(histogramValue * yScale));
                 y2 = histogramImageHeight - ((int)(histogramValue2 * yScale));
@@ -352,15 +556,15 @@ namespace ImageOperations
                 if (i == 0) graphics.DrawString("0", font, brush, 0, histogramImageHeight - font.GetHeight());
                 else
                 {
-                    graphics.DrawString(Convert.ToString((5-i)*image.HistogramMaxValue / 4), 
-                        font, brush, 0, (i-1)*(histogramImageHeight/4));
+                    graphics.DrawString(Convert.ToString((5 - i) * image.HistogramMaxValue / 4),
+                        font, brush, 0, (i - 1) * (histogramImageHeight / 4));
                 }
-                
+
             }
-            
+
             histogramImage.Save(fileName);
         }
 
-        
+
     }
 }

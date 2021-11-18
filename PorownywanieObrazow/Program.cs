@@ -1,4 +1,6 @@
 ﻿using ImageOperations;
+using System;
+using System.Diagnostics;
 using System.Drawing;
 
 //email: dobija.bartosz@gmail.com
@@ -7,17 +9,35 @@ class Porownywanie_Obrazow
 {
     static void Main()
     {
-        Bitmap testImage = new Bitmap("D:/noise/zupa.jpg");
-        Bitmap testImage2 = new Bitmap("D:/noise/zupa3.jpg");
+        Stopwatch sw = new Stopwatch();
+        sw.Start();
+        Bitmap testImage = new Bitmap("C:/zdj/krajobraz.jpg");
+        Bitmap testImage2 = new Bitmap("C:/zdj/krajobraz2.jpg");
         ImageContainer obraz1 = new ImageContainer(testImage);
-        ImageContainer obraz2 = new ImageContainer(testImage);
+        //ImageContainer obrazAccu2 = new ImageContainer(testImage, 2);
+        //ImageContainer obrazAccu4 = new ImageContainer(testImage, 4);
+        ImageContainer obraz2 = new ImageContainer(testImage2);
         Operations op = new Operations();
-        for (int i = 0; i < 5; i++)
+        sw.Stop();
+        Console.WriteLine($"Czas generacji {sw.Elapsed}");
+        for (int i = 1; i < 5; i++)
         {
-            double roznica = op.CompareHistogram(obraz1, obraz2, i);
-            Console.WriteLine(roznica);
+            sw.Restart();
+            //double roznica = op.CompareHistogram(obraz1, obraz2, i);
+            double roznica = op.CompareHistogram(obraz1, obraz2, i, 0, 0, 500, 500);
+            sw.Stop();
+            Console.WriteLine((decimal)roznica);
+            Console.WriteLine($"Czas liczenia {sw.Elapsed}");
         }
-        
-        op.DrawHistogramPlot(obraz1, "D:/noise/histogram.jpg");
+        //Console.WriteLine("Accuracy 1 i accuracy 2");
+        //Console.WriteLine(op.CompareHistogram(obraz1, obrazAccu2, 1, 0, 0, 500, 500));
+        //Console.WriteLine("Accuracy 2 i accuracy 4");
+        //Console.WriteLine(op.CompareHistogram(obrazAccu2, obrazAccu4, 1, 0, 0, 500, 500));
+        //Console.WriteLine("Accuracy 1 i accuracy 4");
+        //Console.WriteLine(op.CompareHistogram(obraz1, obrazAccu4, 1, 0, 0, 500, 500));
+
+        //op.DrawHistogramPlot(obraz1, "C:/zdj/histogram1.jpg");
+        //op.DrawHistogramPlot(obrazAccu2, "C:/zdj/histogram2.jpg");
+        //op.DrawHistogramPlot(obrazAccu4, "C:/zdj/histogram3.jpg");
     }
 }
