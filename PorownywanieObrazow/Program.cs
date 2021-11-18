@@ -11,8 +11,8 @@ class Porownywanie_Obrazow
     {
         Stopwatch sw = new Stopwatch();
         sw.Start();
-        Bitmap testImage = new Bitmap("C:/zdj/krajobraz.jpg");
-        Bitmap testImage2 = new Bitmap("C:/zdj/drzewa.jpg");
+        Bitmap testImage = new Bitmap("C:/zdj/ostre.jpg");
+        Bitmap testImage2 = new Bitmap("C:/zdj/nieostre.jpg");
         ImageContainer obraz1 = new ImageContainer(testImage);
         //ImageContainer obrazAccu2 = new ImageContainer(testImage, 2);
         //ImageContainer obrazAccu4 = new ImageContainer(testImage, 4);
@@ -33,7 +33,6 @@ class Porownywanie_Obrazow
         sw.Restart();
         op.EdgeDetect(obraz1, "C:/zdj/edgeDetect.jpg");
         sw.Stop();
-        Console.WriteLine($"Czas liczenia {sw.Elapsed}");
         op.EdgeDetect(obraz2, "C:/zdj/edgeDetect2.jpg");
 
         //Console.WriteLine("Kontrast 1: "+ op.GetContrast(obraz1, 0, 0, 500, 500));

@@ -12,7 +12,7 @@ namespace ImageOperations
         int amountOfValues;
         int histogramMaxValue;
         int accuracy;
-        public int[][] R; //zmienić na tablice poszarpane i properties na pola 
+        public int[][] R;
         public int[][] G;
         public int[][] B;
         int[][] histogramRGB = new int[3][];
@@ -88,9 +88,9 @@ namespace ImageOperations
             Width = imageToLoad.Width;
             Height = imageToLoad.Height;
 
-            int[][] R = new int[Width][];
-            int[][] G = new int[Width][];
-            int[][] B = new int[Width][];
+            R = new int[Width][];
+            G = new int[Width][];
+            B = new int[Width][];
 
             for (int i = 0; i < Width; i++)
             {
@@ -493,10 +493,11 @@ namespace ImageOperations
 
         public double GetContrast(ImageContainer image, int startX, int startY, int endX, int endY)
         {
-            double Normalize(double value8bit)
+            double Normalize(int value8bit)
             {
-                return value8bit / 255 * 3;
+                return (double)value8bit / (255 * 3);
             }
+
             double sumOfPixelValues = 0;
             for (int i = startX; i < endX; i++)
             {
@@ -526,10 +527,17 @@ namespace ImageOperations
             return Math.Sqrt(meanValue / ((endX - startX) * (endY - startY)));
         }
 
-        public void EdgeDetect(ImageContainer image, string fileName)
+        public double GetContrast(ImageContainer image)
+        {
+            return GetContrast(image, 0, 0, image.Width, image.Height);
+        }
+
+        public double EdgeDetect(ImageContainer image, string fileName)
         {
             Bitmap edgeDetectImage = new Bitmap(image.Width, image.Height);
             Color color = new Color();
+            double edgeDetectAmount = 0;
+
 
             int LoadMatrix(int x, int y)
             {
@@ -589,6 +597,11 @@ namespace ImageOperations
                         newPixelValue = 0;
                     if (newPixelValue > 255)
                         newPixelValue = 255;
+                    if (newPixelValue>128)
+                    {
+                        edgeDetectAmount += newPixelValue;
+                    }
+                    
 
                     color = Color.FromArgb(255, newPixelValue, newPixelValue, newPixelValue);
 
@@ -596,7 +609,9 @@ namespace ImageOperations
 
                 }
             }
+            edgeDetectAmount = edgeDetectAmount / (image.Width * image.Height);
             edgeDetectImage.Save(fileName);
+            return edgeDetectAmount;
         }
 
         public void DrawHistogramPlot(ImageContainer image, string fileName)
