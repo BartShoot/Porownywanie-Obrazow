@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using PorownywanieObrazow;
+using System.Drawing;
 using System.Drawing.Imaging;
 
 namespace ImageOperations
@@ -6,6 +7,7 @@ namespace ImageOperations
     public class ImageContainer
     {
         Bitmap imageToLoad;
+        Histogram histogram;
         int width;
         int height;
         int bitDepth;
@@ -21,65 +23,8 @@ namespace ImageOperations
         double averageHistogramValue;
         bool isHistogramCalculated;
 
-        public ImageContainer(Bitmap imageToLoad)
+        public ImageContainer(Bitmap imageToLoad) : this(imageToLoad, 1)
         {
-            this.imageToLoad = imageToLoad;
-            Width = imageToLoad.Width;
-            Height = imageToLoad.Height;
-
-            R = new int[Width][];
-            G = new int[Width][];
-            B = new int[Width][];
-
-            for (int i = 0; i < Width; i++)
-            {
-                R[i] = new int[Height];
-                G[i] = new int[Height];
-                B[i] = new int[Height];
-            }
-
-            bitDepth = 8;
-            Accuracy = 1;
-            AmountOfValues = (int)Math.Pow(2, bitDepth) / Accuracy;
-            HistogramMaxValue = 0;
-            IsHistogramCalculated = false;
-
-            HistogramNormalized = new double[AmountOfValues / accuracy];
-            for (int i = 0; i < histogramRGB.Length; i++)
-            {
-                histogramRGB[i] = new int[AmountOfValues / accuracy];
-            }
-            histogramHSV[0] = new int[360];
-            histogramHSV[1] = new int[256];
-            histogramHSV[2] = new int[256];
-
-            unsafe
-            {
-                BitmapData bitmapData = imageToLoad.LockBits
-                    (
-                    new Rectangle(0, 0, imageToLoad.Width, imageToLoad.Height),
-                    ImageLockMode.ReadWrite,
-                    imageToLoad.PixelFormat
-                    );
-                int bytesPerPixel = System.Drawing.Bitmap.GetPixelFormatSize(imageToLoad.PixelFormat) / 8;
-                int heightInPixels = bitmapData.Height;
-                int currentWidthInPixels = 0;
-                int widthInBytes = bitmapData.Width * bytesPerPixel;
-                byte* ptrFirstPixel = (byte*)bitmapData.Scan0;
-
-                for (int y = 0; y < heightInPixels; y++)
-                {
-                    byte* currentLine = ptrFirstPixel + (y * bitmapData.Stride);
-                    for (int x = 0; x < widthInBytes; x = x + bytesPerPixel)
-                    {
-                        currentWidthInPixels = x / bytesPerPixel;
-                        R[currentWidthInPixels][y] = currentLine[x];
-                        G[currentWidthInPixels][y] = currentLine[x + 1];
-                        B[currentWidthInPixels][y] = currentLine[x + 2];
-                    }
-                }
-                imageToLoad.UnlockBits(bitmapData);
-            }
         }
 
         public ImageContainer(Bitmap imageToLoad, int accuracy)
@@ -101,7 +46,8 @@ namespace ImageOperations
 
             bitDepth = 8;
             this.accuracy = accuracy;
-            AmountOfValues = (int)Math.Pow(2, bitDepth) / Accuracy;
+            amountOfValues = (int)Math.Pow(2, bitDepth) / Accuracy;
+            histogram = new Histogram(amountOfValues, accuracy);
             HistogramMaxValue = 0;
             IsHistogramCalculated = false;
 
@@ -397,6 +343,7 @@ namespace ImageOperations
         private void CalculateHistogram(ImageContainer image)
         {
             CalculateHistogram(image, 0, 0, image.Width, image.Height);
+            
         }
 
         private void CalculateHistogram(ImageContainer image, int startX, int startY, int endX, int endY)
@@ -597,16 +544,15 @@ namespace ImageOperations
                         newPixelValue = 0;
                     if (newPixelValue > 255)
                         newPixelValue = 255;
+
                     if (newPixelValue>128)
                     {
                         edgeDetectAmount += newPixelValue;
                     }
                     
-
                     color = Color.FromArgb(255, newPixelValue, newPixelValue, newPixelValue);
 
                     edgeDetectImage.SetPixel(i, j, color);
-
                 }
             }
             edgeDetectAmount = edgeDetectAmount / (image.Width * image.Height);

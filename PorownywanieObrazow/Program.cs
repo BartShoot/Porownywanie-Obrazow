@@ -11,6 +11,12 @@ class Porownywanie_Obrazow
     {
         Stopwatch sw = new Stopwatch();
         sw.Start();
+
+
+        //zrobić zasady SOLID
+
+
+
         Bitmap testImage = new Bitmap("C:/zdj/ostre.jpg");
         Bitmap testImage2 = new Bitmap("C:/zdj/nieostre.jpg");
         ImageContainer obraz1 = new ImageContainer(testImage);
