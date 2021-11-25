@@ -7,16 +7,19 @@ using System.Threading.Tasks;
 
 namespace PorownywanieObrazow
 {
-    internal class Histogram
+    internal class HistogramData
     {
-        int[][] histogramRGB = new int[3][];
-        int[][] histogramHSV = new int[3][];
-        double[] histogramNormalized;
-        double averageHistogramValue;
-        bool isHistogramCalculated;
-        int histogramMaxValue;
-        public Histogram(int amountOfValues, int accuracy)
+        public int[][] histogramRGB = new int[3][];
+        public int[][] histogramHSV = new int[3][];
+        public double[] histogramNormalized;
+        public double averageHistogramValue;
+        public bool isHistogramCalculated;
+        public int histogramMaxValue;
+        public int amountOfValues;
+        HistogramPlotDrawing drawHistogram;
+        public HistogramData(ImageContainer image, int amountOfValues, int accuracy)
         {
+            this.amountOfValues = amountOfValues;
             isHistogramCalculated = false;
             histogramNormalized = new double[amountOfValues / accuracy];
             for (int i = 0; i < histogramRGB.Length; i++)
@@ -26,8 +29,9 @@ namespace PorownywanieObrazow
             histogramHSV[0] = new int[360];
             histogramHSV[1] = new int[256];
             histogramHSV[2] = new int[256];
+            CalculateHistogram(image, 0, 0,image.Width,image.Height);
         }
-        private void CalculateHistogram(ImageContainer image, int startX, int startY, int endX, int endY)
+        public void CalculateHistogram(ImageContainer image, int startX, int startY, int endX, int endY)
         {
             if (image.IsHistogramCalculated)
             {
@@ -73,6 +77,15 @@ namespace PorownywanieObrazow
                 image.HistogramNormalized[i] = (double)(image.HistogramRGB[0][i] + image.HistogramRGB[1][i] + image.HistogramRGB[2][i]) / (double)imageSizeTimesColors;
                 test += image.HistogramNormalized[i];
             }
+        }
+
+        public void DrawHistogramPlot(string fileName)
+        {
+            if (!isHistogramCalculated)
+            {
+                throw new InvalidOperationException("Histogram not calculated!");
+            }
+            drawHistogram = new HistogramPlotDrawing(this, fileName);
         }
     }
 }

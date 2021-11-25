@@ -7,7 +7,7 @@ namespace ImageOperations
     public class ImageContainer
     {
         Bitmap imageToLoad;
-        Histogram histogram;
+        HistogramData histogram;
         int width;
         int height;
         int bitDepth;
@@ -23,9 +23,8 @@ namespace ImageOperations
         double averageHistogramValue;
         bool isHistogramCalculated;
 
-        public ImageContainer(Bitmap imageToLoad) : this(imageToLoad, 1)
-        {
-        }
+        public ImageContainer(Bitmap imageToLoad) :
+            this(imageToLoad, 1) { }
 
         public ImageContainer(Bitmap imageToLoad, int accuracy)
         {
@@ -47,7 +46,6 @@ namespace ImageOperations
             bitDepth = 8;
             this.accuracy = accuracy;
             amountOfValues = (int)Math.Pow(2, bitDepth) / Accuracy;
-            histogram = new Histogram(amountOfValues, accuracy);
             HistogramMaxValue = 0;
             IsHistogramCalculated = false;
 
@@ -87,6 +85,7 @@ namespace ImageOperations
                 }
                 imageToLoad.UnlockBits(bitmapData);
             }
+            Histogram = new HistogramData(this, amountOfValues, accuracy);
         }
 
         public int[][] HistogramRGB { get => histogramRGB; set => histogramRGB = value; }
@@ -99,6 +98,7 @@ namespace ImageOperations
         public int HistogramMaxValue { get => histogramMaxValue; set => histogramMaxValue = value; }
         public bool IsHistogramCalculated { get => isHistogramCalculated; set => isHistogramCalculated = value; }
         public int Accuracy { get => accuracy; set => accuracy = value; }
+        internal HistogramData Histogram { get => histogram; set => histogram = value; }
     }
     public class Operations
     {
@@ -562,6 +562,7 @@ namespace ImageOperations
 
         public void DrawHistogramPlot(ImageContainer image, string fileName)
         {
+            image.Histogram.CalculateHistogram(image,0,0,image.Width,image.Height);
             CalculateHistogram(image);
             int histogramImageWidth = 2000, histogramImageHeight = 1000;
             Bitmap histogramImage = new Bitmap(histogramImageWidth, histogramImageHeight);

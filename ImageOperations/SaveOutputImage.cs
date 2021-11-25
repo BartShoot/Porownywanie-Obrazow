@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace ImageOperations
 {
-    internal class ImageDrawing
+    internal class SaveOutputImage
     {
-
     }
 }
