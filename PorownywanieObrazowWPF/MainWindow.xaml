@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:PorownywanieObrazowWPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="auto" Width="auto" WindowState="Maximized">
-	<Grid x:Name="Grid1" VerticalAlignment="Stretch" HorizontalAlignment="Left" ShowGridLines="True" 
+	<Grid x:Name="Grid1" VerticalAlignment="Stretch" HorizontalAlignment="Left" 
 		    Width="{Binding ActualWidth, 
               RelativeSource = {RelativeSource AncestorType = {x:Type Window}}}" 
             Height="{Binding ActualHeight, 
@@ -20,11 +20,11 @@
 			<RowDefinition Height="1*"/>
 			<RowDefinition Height="1*"/>
 		</Grid.RowDefinitions>
-		<Button Content="Załaduj obraz 1" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Button_Click1" Grid.Column="1" Grid.Row="0" />
+		<Button Content="Załaduj obraz 1" HorizontalAlignment="Center" Margin="5,0" VerticalAlignment="Center" Click="Button_Click1" Grid.Column="1" Grid.Row="0" />
 		<Image x:Name="Img1" MinHeight="100" MinWidth="100" HorizontalAlignment="Left" Height="Auto"  VerticalAlignment="Top" Width="Auto" Grid.Column="0" Grid.Row="0" />
 
 
-		<Button Content="Załaduj obraz 2" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Button_Click2" Grid.Column="1" Grid.Row="1" />
+		<Button Content="Załaduj obraz 2" HorizontalAlignment="Center" Margin="5,0" VerticalAlignment="Center" Click="Button_Click2" Grid.Column="1" Grid.Row="1" />
 		<Image x:Name="Img2" MinHeight="100" MinWidth="100" HorizontalAlignment="Left" Height="Auto"  VerticalAlignment="Top" Width="Auto" Grid.Column="0" Grid.Row="1" />
 		<Grid Name="Grid2" Grid.Row="0" Grid.Column="2">
 			<Grid.ColumnDefinitions>
@@ -34,13 +34,35 @@
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
+				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
 			
-			<ComboBox x:Name="Image1FunctionSelect" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" SelectionChanged="Image1FunctionSelect_SelectionChanged" Grid.Row="1">
+			<ComboBox x:Name="Image1FunctionSelect" Grid.Column="0" HorizontalAlignment="Left" Margin="2,10,2,10" VerticalAlignment="Top" Width="120" SelectionChanged="Image1FunctionSelect_SelectionChanged" Grid.Row="1">
+				<ComboBoxItem Content="Zrób Histogram" />
+				<ComboBoxItem Content="Znajdź krawędzie"/>
+			</ComboBox>
+			<TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" Margin="5,0,0,0" TextWrapping="Wrap" Text="Wybierz operacje" VerticalAlignment="Center"/>
+			<Image x:Name="Img1Result" Grid.Column="1" MinHeight="100" HorizontalAlignment="Left" Grid.RowSpan="3" VerticalAlignment="Top" />
+			<Button Content="Wykonaj" HorizontalAlignment="Right" Margin="0,0,2,0" Grid.Row="2" VerticalAlignment="Top"/>
+
+		</Grid>
+		<Grid Name="Grid3" Grid.Row="1" Grid.Column="2" ShowGridLines="True">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition  Width="Auto" />
+				<ColumnDefinition Width="1*" />
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="*" />
+			</Grid.RowDefinitions>
+
+			<ComboBox x:Name="Image2FunctionSelect" Grid.Column="0" HorizontalAlignment="Left" Margin="2,10,2,10" VerticalAlignment="Top" Width="120" SelectionChanged="Image1FunctionSelect_SelectionChanged" Grid.Row="1">
 				<ComboBoxItem Content="Zrób Histogram" />
 			</ComboBox>
-			<TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" TextWrapping="Wrap" Text="Wybierz operacje" VerticalAlignment="Center"/>
-			<Image x:Name="Img1Result" Grid.Column="1" HorizontalAlignment="Left" Height="100" Margin="90,0,0,0" Grid.RowSpan="2" VerticalAlignment="Top" Width="100"/>
+			<TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" Margin="5,0,0,0" TextWrapping="Wrap" Text="Wybierz operacje" VerticalAlignment="Center"/>
+			<Image x:Name="Img2Result" Grid.Column="1" MinHeight="100" HorizontalAlignment="Left" Grid.RowSpan="3" VerticalAlignment="Top" />
+			<Button Content="Wykonaj" HorizontalAlignment="Right" Margin="0,0,2,0" Grid.Row="2" VerticalAlignment="Top"/>
 
 		</Grid>
 	</Grid>
