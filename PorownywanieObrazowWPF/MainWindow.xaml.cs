@@ -1,6 +1,7 @@
 ﻿using ImageOperations;
 using Microsoft.Win32;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,7 @@ namespace PorownywanieObrazowWPF
     {
         ImageContainer image1;
         ImageContainer image2;
-        Operations op = new Operations();
+        Operations operations = new Operations();
         public MainWindow()
         {
             InitializeComponent();
@@ -64,14 +65,24 @@ namespace PorownywanieObrazowWPF
             {
                 case 0:
                     if (image1 != null && image2 != null)
-                        MessageBox.Show(Convert.ToString(op.CompareHistogram(image1, image2, 1)));
+                    {
+                        var histResult= Convert.ToString(operations.CompareHistogram(image1, image2, 1));
+                        MessageBox.Show(histResult);
+                        image1Output.Text += Environment.NewLine + histResult;
+                    }
                     else
                         MessageBox.Show("Załaduj oba obrazy","Uwaga!",MessageBoxButton.OK, MessageBoxImage.Error);
                     break;
                 case 1:
-                    var result = op.EdgeDetect(image1, "edgeDetect.png");
-                    MessageBox.Show(Convert.ToString(result.amount));
-                    Img1Result.Source = new BitmapImage(new Uri(result.fileName, UriKind.RelativeOrAbsolute));
+                    if (image1 != null)
+                    {
+                        var result = operations.EdgeDetect(image1, "edgeDetect.png");
+                        MessageBox.Show(Convert.ToString(result.amount));
+                        var path = System.IO.Path.Combine(Environment.CurrentDirectory, result.fileName);
+                        Img1Result.Source = new BitmapImage(new Uri(path));
+                    }
+                    else
+                        MessageBox.Show("Załaduj obraz", "Uwaga!", MessageBoxButton.OK, MessageBoxImage.Error);
                     break;
                 default:
                     MessageBox.Show("oof");

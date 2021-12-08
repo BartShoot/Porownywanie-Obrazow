@@ -43,10 +43,11 @@
 			</ComboBox>
 			<TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" Margin="5,0,0,0" TextWrapping="Wrap" Text="Wybierz operacje" VerticalAlignment="Center"/>
 			<Image x:Name="Img1Result" Grid.Column="1" MinHeight="100" HorizontalAlignment="Left" Grid.RowSpan="3" VerticalAlignment="Top" />
-			<Button Content="Wykonaj" HorizontalAlignment="Right" Margin="0,0,2,0" Grid.Row="2" VerticalAlignment="Top"/>
+			<TextBlock x:Name="image1Output" Grid.Column="0" Grid.Row="2" Margin="5" TextWrapping="Wrap" Text="Tutaj będą wyniki"/>
+			<!--<Button Content="Wykonaj" HorizontalAlignment="Right" Margin="0,0,2,0" Grid.Row="2" VerticalAlignment="Top"/> -->
 
 		</Grid>
-		<Grid Name="Grid3" Grid.Row="1" Grid.Column="2" ShowGridLines="True">
+		<Grid Name="Grid3" Grid.Row="1" Grid.Column="2">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition  Width="Auto" />
 				<ColumnDefinition Width="1*" />
@@ -62,7 +63,7 @@
 			</ComboBox>
 			<TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" Margin="5,0,0,0" TextWrapping="Wrap" Text="Wybierz operacje" VerticalAlignment="Center"/>
 			<Image x:Name="Img2Result" Grid.Column="1" MinHeight="100" HorizontalAlignment="Left" Grid.RowSpan="3" VerticalAlignment="Top" />
-			<Button Content="Wykonaj" HorizontalAlignment="Right" Margin="0,0,2,0" Grid.Row="2" VerticalAlignment="Top"/>
+			<!--<Button Content="Wykonaj" HorizontalAlignment="Right" Margin="0,0,2,0" Grid.Row="2" VerticalAlignment="Top"/>-->
 
 		</Grid>
 	</Grid>
