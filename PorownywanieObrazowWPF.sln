@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31912.275
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PorownywanieObrazowWPF", "PorownywanieObrazowWPF\PorownywanieObrazowWPF.csproj", "{E1A9B297-8E8D-49FA-96A5-04F352E732CA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageOperations", "..\..\..\Documents\GitHub\Porownywanie-Obrazow\ImageOperations\ImageOperations.csproj", "{AE27070F-5556-4231-867E-F21B0561C6B9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E1A9B297-8E8D-49FA-96A5-04F352E732CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1A9B297-8E8D-49FA-96A5-04F352E732CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1A9B297-8E8D-49FA-96A5-04F352E732CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1A9B297-8E8D-49FA-96A5-04F352E732CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE27070F-5556-4231-867E-F21B0561C6B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE27070F-5556-4231-867E-F21B0561C6B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE27070F-5556-4231-867E-F21B0561C6B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE27070F-5556-4231-867E-F21B0561C6B9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {728CDA91-4CE1-48DF-8CB2-A0168B43ADD3}
+	EndGlobalSection
+EndGlobal
