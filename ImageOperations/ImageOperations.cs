@@ -14,9 +14,9 @@ namespace ImageOperations
         int amountOfValues;
         int histogramMaxValue;
         int accuracy;
-        public int[][] R;
-        public int[][] G;
-        public int[][] B;
+        public byte[][] R;
+        public byte[][] G;
+        public byte[][] B;
         int[][] histogramRGB = new int[3][];
         int[][] histogramHSV = new int[3][];
         double[] histogramNormalized;
@@ -28,19 +28,23 @@ namespace ImageOperations
 
         public ImageContainer(Bitmap imageToLoad, int accuracy)
         {
+            //klasa abstrakcyjna od odczytu i zapisu plików np IOOperations
+            //odczyt zwracający dwuwymiarową tablicy byte
+            //zapis zapisuje dane 
+            //musi być opcja obsługi różnych formatów bez zamieniania istniejących klas (np ImageSharp) 
             this.imageToLoad = imageToLoad;
             Width = imageToLoad.Width;
             Height = imageToLoad.Height;
 
-            R = new int[Width][];
-            G = new int[Width][];
-            B = new int[Width][];
+            R = new byte[Width][];
+            G = new byte[Width][];
+            B = new byte[Width][];
 
             for (int i = 0; i < Width; i++)
             {
-                R[i] = new int[Height];
-                G[i] = new int[Height];
-                B[i] = new int[Height];
+                R[i] = new byte[Height];
+                G[i] = new byte[Height];
+                B[i] = new byte[Height];
             }
 
             bitDepth = 8;
