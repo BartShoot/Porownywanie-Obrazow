@@ -68,7 +68,7 @@ namespace PorownywanieObrazowWPF
                     {
                         var histResult= Convert.ToString(operations.CompareHistogram(image1, image2, 1));
                         MessageBox.Show(histResult);
-                        image1Output.Text += Environment.NewLine + histResult;
+                        image1Output.Text += Environment.NewLine + "Wynik porównania histogramu(korelacja):"+Environment.NewLine + histResult;
                     }
                     else
                         MessageBox.Show("Załaduj oba obrazy","Uwaga!",MessageBoxButton.OK, MessageBoxImage.Error);
@@ -78,6 +78,7 @@ namespace PorownywanieObrazowWPF
                     {
                         var result = operations.EdgeDetect(image1, "edgeDetect.png");
                         MessageBox.Show(Convert.ToString(result.amount));
+                        image1Output.Text += Environment.NewLine + "Ilość znalezionych krawędzi:" + Environment.NewLine + result.amount;
                         var path = System.IO.Path.Combine(Environment.CurrentDirectory, result.fileName);
                         Img1Result.Source = new BitmapImage(new Uri(path));
                     }
