@@ -25,9 +25,12 @@ namespace PorownywanieObrazowWPF
     {
         ImageContainer image1;
         ImageContainer image2;
+        ImageContainer imageEdgeDetect;
         Operations operations = new Operations();
+        ConvolutionOperations convolutionOperations = new ConvolutionOperations();
         public MainWindow()
         {
+            System.IO.Directory.CreateDirectory(@"D:\zdj\matrixop");
             InitializeComponent();
         }
 
@@ -40,22 +43,22 @@ namespace PorownywanieObrazowWPF
               "Portable Network Graphic (*.png)|*.png";
             if (op.ShowDialog() == true)
             {
-                Img1.Source = new BitmapImage(new Uri(op.FileName));
-                image1 = new ImageContainer(new System.Drawing.Bitmap(op.FileName));
+                if (sender.Equals(LoadImageForEdgeDetect))
+                {
+                    ImgEdgeDetect.Source = new BitmapImage(new Uri(op.FileName));
+                    imageEdgeDetect = new ImageContainer(new System.Drawing.Bitmap(op.FileName));
+                }
+                if (sender.Equals(Img1Loader))
+                {
+                    Img1.Source = new BitmapImage(new Uri(op.FileName));
+                    image1 = new ImageContainer(new System.Drawing.Bitmap(op.FileName));
+                }
+                if (sender.Equals(Img2Loader))
+                {
+                    Img2.Source = new BitmapImage(new Uri(op.FileName));
+                    image2 = new ImageContainer(new System.Drawing.Bitmap(op.FileName));
+                }
             }         
-        }
-        private void Button_Click2(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog op = new OpenFileDialog();
-            op.Title = "Select a picture";
-            op.Filter = "All supported graphics|*.jpg;*.jpeg;*.png|" +
-              "JPEG (*.jpg;*.jpeg)|*.jpg;*.jpeg|" +
-              "Portable Network Graphic (*.png)|*.png";
-            if (op.ShowDialog() == true)
-            {
-                Img2.Source = new BitmapImage(new Uri(op.FileName));
-                image2 = new ImageContainer(new System.Drawing.Bitmap(op.FileName));
-            }
         }
 
         private void Image1FunctionSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -80,7 +83,12 @@ namespace PorownywanieObrazowWPF
                         MessageBox.Show(Convert.ToString(result.amount));
                         image1Output.Text += Environment.NewLine + "Ilość znalezionych krawędzi:" + Environment.NewLine + result.amount;
                         var path = System.IO.Path.Combine(Environment.CurrentDirectory, result.fileName);
-                        Img1Result.Source = new BitmapImage(new Uri(path));
+                        BitmapImage image = new BitmapImage();
+                        image.BeginInit();
+                        image.CacheOption = BitmapCacheOption.OnLoad;
+                        image.UriSource = new Uri(path);
+                        image.EndInit();
+                        Img1Result.Source = image;
                     }
                     else
                         MessageBox.Show("Załaduj obraz", "Uwaga!", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -89,6 +97,41 @@ namespace PorownywanieObrazowWPF
                     MessageBox.Show("oof");
                     break;
             }
+        }
+
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void CalculateMatrix_Click(object sender, RoutedEventArgs e)
+        {
+            string matrix = MatrixForOp.Text;
+            string[][] placeholder;
+            int[][] convertedMatrix;
+            matrix.Replace("\r\n", "\n");
+            placeholder = matrix.Split(' ')
+                                .Select(x => x.Split('\n'))
+                                .ToArray();
+
+            convertedMatrix = new int[placeholder.Length][];
+            for (int i = 0; i < placeholder.Length; i++)
+                convertedMatrix[i] = new int[placeholder.Length];
+            for (int i = 0; i < placeholder.Length; i++)
+            {
+                for (int j = 0; j < placeholder.Length; j++)
+                {
+                    convertedMatrix[i][j] = Convert.ToInt32(placeholder[i][j]);
+                }
+            }
+            var result = convolutionOperations.MatrixOP(imageEdgeDetect, "matrixOp.png", convertedMatrix);
+            var path = System.IO.Path.Combine(Environment.CurrentDirectory, result.fileName);
+            BitmapImage image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.UriSource = new Uri(path);
+            image.EndInit();
+            ImgEdgeDetect.Source = image;
         }
     }
 }
