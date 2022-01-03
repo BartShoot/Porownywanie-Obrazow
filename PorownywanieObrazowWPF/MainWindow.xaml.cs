@@ -144,7 +144,6 @@ namespace PorownywanieObrazowWPF
         private void CalculateMatrix_Click(object sender, RoutedEventArgs e)
         {
             int[][] convertedMatrix;
-
             convertedMatrix = new int[_textBox.GetLength(0)][];
             for (int i = 0; i < _textBox.GetLength(0); i++)
                 convertedMatrix[i] = new int[_textBox.GetLength(0)];
@@ -157,18 +156,13 @@ namespace PorownywanieObrazowWPF
                 }
             }
 
-            var result = convolutionOperations.MatrixOP(imageEdgeDetect, "matrixOp.png", convertedMatrix);
+            var result = convolutionOperations.MatrixOP(imageEdgeDetect, $"matrixOp{DateTime.Now.Ticks.ToString()}.png", convertedMatrix);
             var path = System.IO.Path.Combine(Environment.CurrentDirectory, result.fileName);
             BitmapImage image = new BitmapImage();
             image.BeginInit();
             image.CacheOption = BitmapCacheOption.OnLoad;
             image.UriSource = new Uri(path);
             image.EndInit();
-            if (ImgEdgeDetectResult.Source!= null)
-            {
-                ImgEdgeDetectResult.Source = null;
-            }
-            UpdateLayout();
             ImgEdgeDetectResult.Source = image;
         }
     }
