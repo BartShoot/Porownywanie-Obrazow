@@ -85,7 +85,7 @@ namespace ImageOperations
         {
             Bitmap edgeDetectImage = new Bitmap(image.Width, image.Height);
             Color color = new Color();
-            double edgeDetectAmount = 0;
+            double convolutionAmount = 0;
 
 
             int LoadMatrix(int x, int y)
@@ -131,16 +131,16 @@ namespace ImageOperations
                     if (newPixelValue > 255)
                         newPixelValue = 255;
 
-                    edgeDetectAmount += newPixelValue;
+                    convolutionAmount += newPixelValue;
 
                     color = Color.FromArgb(255, newPixelValue, newPixelValue, newPixelValue);
 
                     edgeDetectImage.SetPixel(i, j, color);
                 }
             }
-            edgeDetectAmount = edgeDetectAmount / (image.Width * image.Height);
+            convolutionAmount = convolutionAmount / (image.Width * image.Height);
             edgeDetectImage.Save(fileName);
-            return (edgeDetectAmount, fileName);
+            return (convolutionAmount, fileName);
         }
     }
 }

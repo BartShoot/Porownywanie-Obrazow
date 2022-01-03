@@ -28,8 +28,24 @@ namespace PorownywanieObrazowWPF
         ImageContainer imageEdgeDetect;
         Operations operations = new Operations();
         ConvolutionOperations convolutionOperations = new ConvolutionOperations();
+        TextBox[,] _textBox;
         public MainWindow()
         {
+            int N = 9;
+            _textBox = new TextBox[N, N];
+            for (int i = 0; i < N; i++)
+            {
+                for (int j = 0; j < N; j++)
+                {
+                    _textBox[i, j] = new TextBox();
+                    _textBox[i, j].Width = 40;
+                    _textBox[i, j].Height = 40;
+                    _textBox[i, j].Margin = new Thickness(100 + 40 * i, 100 + 40 * j, 0, 0);
+                    G.Children.Add(_textBox[i, j]);
+                    Grid.SetRow(_textBox[i, j], 0);
+                }
+            }
+
             System.IO.Directory.CreateDirectory(@"D:\zdj\matrixop");
             InitializeComponent();
         }
@@ -106,24 +122,20 @@ namespace PorownywanieObrazowWPF
 
         private void CalculateMatrix_Click(object sender, RoutedEventArgs e)
         {
-            string matrix = MatrixForOp.Text;
-            string[][] placeholder;
             int[][] convertedMatrix;
-            matrix.Replace("\r\n", "\n");
-            placeholder = matrix.Split(' ')
-                                .Select(x => x.Split('\n'))
-                                .ToArray();
 
-            convertedMatrix = new int[placeholder.Length][];
-            for (int i = 0; i < placeholder.Length; i++)
-                convertedMatrix[i] = new int[placeholder.Length];
-            for (int i = 0; i < placeholder.Length; i++)
+            convertedMatrix = new int[_textBox.Length][];
+            for (int i = 0; i < _textBox.Length; i++)
+                convertedMatrix[i] = new int[_textBox.Length];
+
+            for (int i = 0; i < _textBox.Length; i++)
             {
-                for (int j = 0; j < placeholder.Length; j++)
+                for (int j = 0; j < _textBox.Length; j++)
                 {
-                    convertedMatrix[i][j] = Convert.ToInt32(placeholder[i][j]);
+                    convertedMatrix[i][j] = Convert.ToInt32(_textBox[i, j].Text);
                 }
             }
+
             var result = convolutionOperations.MatrixOP(imageEdgeDetect, "matrixOp.png", convertedMatrix);
             var path = System.IO.Path.Combine(Environment.CurrentDirectory, result.fileName);
             BitmapImage image = new BitmapImage();

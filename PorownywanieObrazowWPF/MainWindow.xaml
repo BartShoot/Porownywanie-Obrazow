@@ -96,7 +96,7 @@
 				<Image x:Name="ImgEdgeDetect" MinHeight="100" MinWidth="100" HorizontalAlignment="Left" Height="Auto"  VerticalAlignment="Top" Width="Auto" Grid.Column="0" Grid.Row="0" />
 
 				
-				<Grid Grid.Row="1">
+				<Grid Grid.Row="1" ShowGridLines="True">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="Auto" />
 						<ColumnDefinition Width="Auto" />
@@ -106,7 +106,11 @@
 						<RowDefinition Height="Auto"/>
 					</Grid.RowDefinitions>
 					<TextBlock FontSize="14" TextWrapping="Wrap" Width="200" Text="Rekomendowane rozmiary: 3x3, 5x5. Możliwe 7x7 i 9x9 ale znacznie wydłuży to czas obliczeń. Macierz wprowadzamy liczbami rozdzielonymi spacjami i enterami."/>
-					<TextBox x:Name="MatrixForOp" Grid.Row="1" Grid.Column="0" AcceptsReturn="True" MinHeight="100" MinWidth="100" Margin="5" FontSize="16"/>
+					<Grid x:Name="G" Grid.Row="1" Grid.Column="0" MinHeight="100" MinWidth="100" Margin="5">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto"/>
+						</Grid.RowDefinitions>
+					</Grid>
 					<StackPanel Grid.Column="1" Grid.Row="1">
 						<Button x:Name="CalculateMatrix" Content="Oblicz" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center" Click="CalculateMatrix_Click"/>
 						<Button x:Name="ReadMatrix" Content="Wczytaj z pliku" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
