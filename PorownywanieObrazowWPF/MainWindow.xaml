@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PorownywanieObrazowWPF"
         mc:Ignorable="d"
+		FontSize="20"
         Title="MainWindow" Height="auto" Width="auto" WindowState="Maximized">
 	<Window.Resources>
 		<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -94,8 +95,10 @@
 				</Grid.RowDefinitions>
 				<Button x:Name="LoadImageForEdgeDetect" Content="Załaduj obraz" HorizontalAlignment="Center" Margin="5,0" VerticalAlignment="Center" Click="Button_Click1" Grid.Column="1" Grid.Row="0" />
 				<Image x:Name="ImgEdgeDetect" MinHeight="100" MinWidth="100" HorizontalAlignment="Left" Height="Auto"  VerticalAlignment="Top" Width="Auto" Grid.Column="0" Grid.Row="0" />
+				<Image x:Name="ImgEdgeDetectResult" MinHeight="100" MinWidth="100" HorizontalAlignment="Left" Height="Auto"  
+					   VerticalAlignment="Top" Width="Auto" Grid.Column="2" Grid.Row="0" />
 
-				
+
 				<Grid Grid.Row="1" ShowGridLines="True">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="Auto" />
@@ -104,14 +107,22 @@
 					<Grid.RowDefinitions>
 						<RowDefinition Height="Auto"/>
 						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
 					</Grid.RowDefinitions>
-					<TextBlock FontSize="14" TextWrapping="Wrap" Width="200" Text="Rekomendowane rozmiary: 3x3, 5x5. Możliwe 7x7 i 9x9 ale znacznie wydłuży to czas obliczeń. Macierz wprowadzamy liczbami rozdzielonymi spacjami i enterami."/>
-					<Grid x:Name="G" Grid.Row="1" Grid.Column="0" MinHeight="100" MinWidth="100" Margin="5">
+					<TextBlock FontSize="14" TextWrapping="Wrap" Width="200" Grid.Row="0"
+							   Text="Rekomendowane rozmiary: 3x3, 5x5. Możliwe 7x7 i 9x9 ale znacznie wydłuży to czas obliczeń. Macierz wprowadzamy liczbami rozdzielonymi spacjami i enterami."/>
+					<Grid x:Name="G" Grid.Row="2" Grid.Column="0" MinHeight="100" MinWidth="100" Margin="5">
 						<Grid.RowDefinitions>
 							<RowDefinition Height="Auto"/>
 						</Grid.RowDefinitions>
 					</Grid>
-					<StackPanel Grid.Column="1" Grid.Row="1">
+					<StackPanel Grid.Row="1" Orientation="Horizontal">
+						<RadioButton x:Name="macierz3" Content="3x3" HorizontalAlignment="Left" Margin="5" Grid.Row="1" VerticalAlignment="Top" Checked="RadioButton_Checked3"/>
+						<RadioButton x:Name="macierz5" Content="5x5" HorizontalAlignment="Left" Margin="5" Grid.Row="1" VerticalAlignment="Top" Checked="RadioButton_Checked5"/>
+						<RadioButton x:Name="macierz7" Content="7x7" HorizontalAlignment="Left" Margin="5" Grid.Row="1" VerticalAlignment="Top" Checked="RadioButton_Checked7"/>
+						<RadioButton x:Name="macierz9" Content="9x9" HorizontalAlignment="Left" Margin="5" Grid.Row="1" VerticalAlignment="Top" Checked="RadioButton_Checked9"/>
+					</StackPanel>
+					<StackPanel Grid.Column="1" Grid.Row="2">
 						<Button x:Name="CalculateMatrix" Content="Oblicz" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center" Click="CalculateMatrix_Click"/>
 						<Button x:Name="ReadMatrix" Content="Wczytaj z pliku" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
 						<Button x:Name="SaveMatrix" Content="Zapisz do pliku" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
@@ -122,12 +133,7 @@
 						<RowDefinition Height="Auto"/>
 						<RowDefinition Height="Auto"/>
 					</Grid.RowDefinitions>
-					<StackPanel Grid.Row="0" Orientation="Horizontal">
-						<RadioButton x:Name="macierz3" Content="3x3" HorizontalAlignment="Left" Margin="5" Grid.Row="1" VerticalAlignment="Top" Checked="RadioButton_Checked"/>
-						<RadioButton x:Name="macierz5" Content="5x5" HorizontalAlignment="Left" Margin="5" Grid.Row="1" VerticalAlignment="Top"/>
-						<RadioButton x:Name="macierz7" Content="7x7" HorizontalAlignment="Left" Margin="5" Grid.Row="1" VerticalAlignment="Top"/>
-						<RadioButton x:Name="macierz9" Content="9x9" HorizontalAlignment="Left" Margin="5" Grid.Row="1" VerticalAlignment="Top"/>
-					</StackPanel>
+					
 					<Grid Grid.Row="1" Visibility="{Binding IsChecked, ElementName=macierz3, Converter={StaticResource BooleanToVisibilityConverter}}">
 						<Grid.RowDefinitions>
 							<RowDefinition Height="20"/>

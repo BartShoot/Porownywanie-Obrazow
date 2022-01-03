@@ -31,23 +31,9 @@ namespace PorownywanieObrazowWPF
         TextBox[,] _textBox;
         public MainWindow()
         {
-            int N = 9;
-            _textBox = new TextBox[N, N];
-            for (int i = 0; i < N; i++)
-            {
-                for (int j = 0; j < N; j++)
-                {
-                    _textBox[i, j] = new TextBox();
-                    _textBox[i, j].Width = 40;
-                    _textBox[i, j].Height = 40;
-                    _textBox[i, j].Margin = new Thickness(100 + 40 * i, 100 + 40 * j, 0, 0);
-                    G.Children.Add(_textBox[i, j]);
-                    Grid.SetRow(_textBox[i, j], 0);
-                }
-            }
+            InitializeComponent();
 
             System.IO.Directory.CreateDirectory(@"D:\zdj\matrixop");
-            InitializeComponent();
         }
 
         private void Button_Click1(object sender, RoutedEventArgs e)
@@ -115,22 +101,57 @@ namespace PorownywanieObrazowWPF
             }
         }
 
-        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        private void RadioButton_Checked3(object sender, RoutedEventArgs e)
         {
+            CreateTextBox(3);
+        }
 
+        private void RadioButton_Checked5(object sender, RoutedEventArgs e)
+        {
+            CreateTextBox(5);
+        }
+
+        private void RadioButton_Checked7(object sender, RoutedEventArgs e)
+        {
+            CreateTextBox(7);
+        }
+
+        private void RadioButton_Checked9(object sender, RoutedEventArgs e)
+        {
+            CreateTextBox(9);
+        }
+
+        private void CreateTextBox(int N)
+        {
+            _textBox = new TextBox[N, N];
+            for (int i = 0; i < N; i++)
+            {
+                for (int j = 0; j < N; j++)
+                {
+                    _textBox[i, j] = new TextBox();
+                    _textBox[i, j].FontSize = 20;
+                    _textBox[i, j].Width = 60;
+                    _textBox[i, j].Height = 60;
+                    _textBox[i, j].Margin = new Thickness(100 * i,100 * j, 1, 1);
+                    _textBox[i, j].BorderThickness = new Thickness(5);
+                    _textBox[i, j].BorderBrush = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+                    G.Children.Add(_textBox[i, j]);
+                    Grid.SetRow(_textBox[i, j], 0);
+                }
+            }
         }
 
         private void CalculateMatrix_Click(object sender, RoutedEventArgs e)
         {
             int[][] convertedMatrix;
 
-            convertedMatrix = new int[_textBox.Length][];
-            for (int i = 0; i < _textBox.Length; i++)
-                convertedMatrix[i] = new int[_textBox.Length];
+            convertedMatrix = new int[_textBox.GetLength(0)][];
+            for (int i = 0; i < _textBox.GetLength(0); i++)
+                convertedMatrix[i] = new int[_textBox.GetLength(0)];
 
-            for (int i = 0; i < _textBox.Length; i++)
+            for (int i = 0; i < _textBox.GetLength(0); i++)
             {
-                for (int j = 0; j < _textBox.Length; j++)
+                for (int j = 0; j < _textBox.GetLength(0); j++)
                 {
                     convertedMatrix[i][j] = Convert.ToInt32(_textBox[i, j].Text);
                 }
@@ -143,7 +164,12 @@ namespace PorownywanieObrazowWPF
             image.CacheOption = BitmapCacheOption.OnLoad;
             image.UriSource = new Uri(path);
             image.EndInit();
-            ImgEdgeDetect.Source = image;
+            if (ImgEdgeDetectResult.Source!= null)
+            {
+                ImgEdgeDetectResult.Source = null;
+            }
+            UpdateLayout();
+            ImgEdgeDetectResult.Source = image;
         }
     }
 }
