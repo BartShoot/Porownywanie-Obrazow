@@ -5,8 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PorownywanieObrazowWPF"
         mc:Ignorable="d"
+		FontSize="20"
         Title="MainWindow" Height="auto" Width="auto" WindowState="Maximized">
-	<Grid x:Name="Grid1" VerticalAlignment="Stretch" HorizontalAlignment="Left" 
+	<Window.Resources>
+		<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+	</Window.Resources>
+	<TabControl>
+
+		<TabItem Header="Porównywanie Obrazów">
+			
+		
+		<Grid x:Name="Grid1" VerticalAlignment="Stretch" HorizontalAlignment="Left" 
 		    Width="{Binding ActualWidth, 
               RelativeSource = {RelativeSource AncestorType = {x:Type Window}}}" 
             Height="{Binding ActualHeight, 
@@ -20,11 +29,11 @@
 			<RowDefinition Height="1*"/>
 			<RowDefinition Height="1*"/>
 		</Grid.RowDefinitions>
-		<Button Content="Załaduj obraz 1" HorizontalAlignment="Center" Margin="5,0" VerticalAlignment="Center" Click="Button_Click1" Grid.Column="1" Grid.Row="0" />
+		<Button x:Name="Img1Loader"  Content="Załaduj obraz 1" HorizontalAlignment="Center" Margin="5,0" VerticalAlignment="Center" Click="Button_Click1" Grid.Column="1" Grid.Row="0" />
 		<Image x:Name="Img1" MinHeight="100" MinWidth="100" HorizontalAlignment="Left" Height="Auto"  VerticalAlignment="Top" Width="Auto" Grid.Column="0" Grid.Row="0" />
 
 
-		<Button Content="Załaduj obraz 2" HorizontalAlignment="Center" Margin="5,0" VerticalAlignment="Center" Click="Button_Click2" Grid.Column="1" Grid.Row="1" />
+		<Button x:Name="Img2Loader" Content="Załaduj obraz 2" HorizontalAlignment="Center" Margin="5,0" VerticalAlignment="Center" Click="Button_Click1" Grid.Column="1" Grid.Row="1" />
 		<Image x:Name="Img2" MinHeight="100" MinWidth="100" HorizontalAlignment="Left" Height="Auto"  VerticalAlignment="Top" Width="Auto" Grid.Column="0" Grid.Row="1" />
 		<Grid Name="Grid2" Grid.Row="0" Grid.Column="2">
 			<Grid.ColumnDefinitions>
@@ -67,4 +76,145 @@
 
 		</Grid>
 	</Grid>
+			
+		</TabItem>
+		<TabItem Header="Operacje macierzowe">
+			<Grid x:Name="GridEdgeDetect" VerticalAlignment="Stretch" HorizontalAlignment="Left" 
+		    Width="{Binding ActualWidth, 
+              RelativeSource = {RelativeSource AncestorType = {x:Type Window}}}" 
+            Height="{Binding ActualHeight, 
+              RelativeSource ={RelativeSource AncestorType = {x:Type Window}}}">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition MinWidth="300" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition MinWidth="300" />
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="1*" MinHeight="300"/>
+					<RowDefinition Height="1*"/>
+				</Grid.RowDefinitions>
+				<Button x:Name="LoadImageForEdgeDetect" Content="Załaduj obraz" HorizontalAlignment="Center" Margin="5,0" VerticalAlignment="Center" Click="Button_Click1" Grid.Column="1" Grid.Row="0" />
+				<Image x:Name="ImgEdgeDetect" MinHeight="100" MinWidth="100" HorizontalAlignment="Left" Height="Auto"  VerticalAlignment="Top" Width="Auto" Grid.Column="0" Grid.Row="0" />
+				<Image x:Name="ImgEdgeDetectResult" MinHeight="100" MinWidth="100" HorizontalAlignment="Left" Height="Auto"  
+					   VerticalAlignment="Top" Width="Auto" Grid.Column="2" Grid.Row="0" />
+
+
+				<Grid Grid.Row="1" ShowGridLines="True">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="Auto" />
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
+					<TextBlock FontSize="14" TextWrapping="Wrap" Width="200" Grid.Row="0"
+							   Text="Rekomendowane rozmiary: 3x3, 5x5. Możliwe 7x7 i 9x9 ale znacznie wydłuży to czas obliczeń. Macierz wprowadzamy liczbami rozdzielonymi spacjami i enterami."/>
+					<Grid x:Name="G" Grid.Row="2" Grid.Column="0" MinHeight="100" MinWidth="100" Margin="5">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto"/>
+						</Grid.RowDefinitions>
+					</Grid>
+					<StackPanel Grid.Row="1" Orientation="Horizontal">
+						<RadioButton x:Name="macierz3" Content="3x3" HorizontalAlignment="Left" Margin="5" Grid.Row="1" VerticalAlignment="Top" Checked="RadioButton_Checked3"/>
+						<RadioButton x:Name="macierz5" Content="5x5" HorizontalAlignment="Left" Margin="5" Grid.Row="1" VerticalAlignment="Top" Checked="RadioButton_Checked5"/>
+						<RadioButton x:Name="macierz7" Content="7x7" HorizontalAlignment="Left" Margin="5" Grid.Row="1" VerticalAlignment="Top" Checked="RadioButton_Checked7"/>
+						<RadioButton x:Name="macierz9" Content="9x9" HorizontalAlignment="Left" Margin="5" Grid.Row="1" VerticalAlignment="Top" Checked="RadioButton_Checked9"/>
+					</StackPanel>
+					<StackPanel Grid.Column="1" Grid.Row="2">
+						<Button x:Name="CalculateMatrix" Content="Oblicz" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center" Click="CalculateMatrix_Click"/>
+						<Button x:Name="ReadMatrix" Content="Wczytaj z pliku" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
+						<Button x:Name="SaveMatrix" Content="Zapisz do pliku" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
+					</StackPanel>
+				</Grid>
+				<!--<Grid Grid.Row="1">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
+					
+					<Grid Grid.Row="1" Visibility="{Binding IsChecked, ElementName=macierz3, Converter={StaticResource BooleanToVisibilityConverter}}">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+						</Grid.RowDefinitions>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+						</Grid.ColumnDefinitions>
+						<Grid.Background>
+							<SolidColorBrush Color="red"/>
+						</Grid.Background>
+					</Grid>
+					<Grid Grid.Row="1" Visibility="{Binding IsChecked, ElementName=macierz5, Converter={StaticResource BooleanToVisibilityConverter}}">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+						</Grid.RowDefinitions>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+						</Grid.ColumnDefinitions>
+
+						<Grid.Background>
+							<SolidColorBrush Color="blue"/>
+						</Grid.Background>
+					</Grid>
+					<Grid Grid.Row="1" Visibility="{Binding IsChecked, ElementName=macierz7, Converter={StaticResource BooleanToVisibilityConverter}}">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+						</Grid.RowDefinitions>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+						</Grid.ColumnDefinitions>
+					</Grid>
+					<Grid Grid.Row="1" Visibility="{Binding IsChecked, ElementName=macierz9, Converter={StaticResource BooleanToVisibilityConverter}}">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+							<RowDefinition Height="20"/>
+						</Grid.RowDefinitions>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+							<ColumnDefinition Width="20" />
+						</Grid.ColumnDefinitions>
+					</Grid>
+				</Grid>-->
+			</Grid>
+		</TabItem>
+	</TabControl>
 </Window>
