@@ -81,7 +81,7 @@ namespace ImageOperations
             return (edgeDetectAmount, fileName);
         }
 
-        public (double amount, string fileName) MatrixOP(ImageContainer image, string fileName, int[][] matrix)
+        public (double amount, string fileName) MatrixOP(ImageContainer image, string fileName, double[][] matrix)
         {
             Bitmap edgeDetectImage = new Bitmap(image.Width, image.Height);
             Color color = new Color();
@@ -122,7 +122,7 @@ namespace ImageOperations
                     {
                         for (int l = 0; l < matrixSize; l++)
                         {
-                            newPixelValue += imageMatrix[k][l] * matrix[k][l];
+                            newPixelValue += (int)(imageMatrix[k][l] * matrix[k][l]);
                         }
                     }
 

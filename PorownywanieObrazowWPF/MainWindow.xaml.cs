@@ -1,20 +1,10 @@
 ﻿using ImageOperations;
 using Microsoft.Win32;
 using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace PorownywanieObrazowWPF
 {
@@ -29,11 +19,19 @@ namespace PorownywanieObrazowWPF
         Operations operations = new Operations();
         ConvolutionOperations convolutionOperations = new ConvolutionOperations();
         TextBox[,] _textBox;
+        PresetMatrixArray preset;
+        string MatrixPresetPath;
         public MainWindow()
         {
-            InitializeComponent();
-
+            MatrixPresetPath = Environment.CurrentDirectory + "\\matrixOpPresets";
+            System.IO.Directory.CreateDirectory(MatrixPresetPath);
+            preset = new PresetMatrixArray(MatrixPresetPath);
             System.IO.Directory.CreateDirectory(@"D:\zdj\matrixop");
+            InitializeComponent();
+            for (int i = 0; i < preset.PresetMatrix.Count; i++)
+            {
+                cmbbox.Items.Add(preset.PresetMatrix[i].name);
+            }
         }
 
         private void Button_Click1(object sender, RoutedEventArgs e)
@@ -143,16 +141,16 @@ namespace PorownywanieObrazowWPF
 
         private void CalculateMatrix_Click(object sender, RoutedEventArgs e)
         {
-            int[][] convertedMatrix;
-            convertedMatrix = new int[_textBox.GetLength(0)][];
+            double[][] convertedMatrix;
+            convertedMatrix = new double[_textBox.GetLength(0)][];
             for (int i = 0; i < _textBox.GetLength(0); i++)
-                convertedMatrix[i] = new int[_textBox.GetLength(0)];
+                convertedMatrix[i] = new double[_textBox.GetLength(0)];
 
             for (int i = 0; i < _textBox.GetLength(0); i++)
             {
                 for (int j = 0; j < _textBox.GetLength(0); j++)
                 {
-                    convertedMatrix[i][j] = Convert.ToInt32(_textBox[i, j].Text);
+                    convertedMatrix[i][j] = Convert.ToDouble(_textBox[i, j].Text);
                 }
             }
 
@@ -164,6 +162,70 @@ namespace PorownywanieObrazowWPF
             image.UriSource = new Uri(path);
             image.EndInit();
             ImgEdgeDetectResult.Source = image;
+        }
+
+        private void cmbbox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int index = cmbbox.SelectedIndex;
+            int size = preset.PresetMatrix[index].values[0].Length;
+            switch (size)
+            {
+                case 3:
+                    RadioButton_Checked3(cmbbox, null);
+                    macierz3.IsEnabled = true;
+                    break;
+                case 5:
+                    RadioButton_Checked5(cmbbox, null);
+                    macierz5.IsEnabled = true;
+                    break;
+                case 7:
+                    RadioButton_Checked7(cmbbox, null);
+                    macierz7.IsEnabled = true;
+                    break;
+                case 9:
+                    RadioButton_Checked9(cmbbox, null);
+                    macierz9.IsEnabled = true;
+                    break;
+                default:
+                    break;
+            }
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    _textBox[i, j].Text = Convert.ToString(preset.PresetMatrix[index].values[i][j]);
+                }
+            }
+        }
+
+        private void SaveMatrix_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.FileName = "Macierz";
+            saveFileDialog.Filter = "Json file (*.json)|*.json";
+            saveFileDialog.InitialDirectory = MatrixPresetPath;
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                var path = System.IO.Path.GetFileNameWithoutExtension(saveFileDialog.SafeFileName);
+                double[][] matrix = new double[3][]
+                {
+                    new double [3],
+                    new double [3],
+                    new double [3]
+                };
+                for (int i = 0; i < _textBox.GetLength(0); i++)
+                {
+                    for (int j = 0; j < _textBox.GetLength(0); j++)
+                    {
+                        matrix[i][j] = Convert.ToDouble(_textBox[i, j].Text);
+                    }
+                }
+
+                MatrixContainer matrixToSave = new(path, 3, matrix);
+                matrixToSave.SaveToJson();
+                preset = new PresetMatrixArray(MatrixPresetPath);
+            }
         }
     }
 }
