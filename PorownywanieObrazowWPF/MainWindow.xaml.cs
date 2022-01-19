@@ -225,6 +225,11 @@ namespace PorownywanieObrazowWPF
                 MatrixContainer matrixToSave = new(path, 3, matrix);
                 matrixToSave.SaveToJson();
                 preset = new PresetMatrixArray(MatrixPresetPath);
+                cmbbox.Items.Clear();
+                for (int i = 0; i < preset.PresetMatrix.Count; i++)
+                {
+                    cmbbox.Items.Add(preset.PresetMatrix[i].name);
+                }
             }
         }
     }
